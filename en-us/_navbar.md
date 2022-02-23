@@ -1,5 +1,5 @@
 <!-- _navbar.md -->
 
-* 切换翻译  
+* Translations  
   * [:uk: En](/)
   * [:cn: 中文](/zh-cn/)

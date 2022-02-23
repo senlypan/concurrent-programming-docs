@@ -1,4 +1,4 @@
-# Java并发编程
+# Java并发编程聚合文档
 
 ![icon](http://concurrent-programming.panshenlian.com/_media/icon200.png)
 
@@ -19,11 +19,11 @@ Java并发编程文档目前支持 `中文`、`英文` 两种语言阅读，文�
 
 # 开源
 
-本文档开源（GihHub:senlypan/concurrent-programming-docs），欢迎提交 issue，投稿或推荐优质Java并发编程内容。
+本文档开源（GihHub:senlypan/concurrent-programming-docs），欢迎提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues)，投稿或推荐优质Java并发编程内容。
 
 # 共创
 
-潘深练，Java并发编程文档发起者，网名大晚，个人网站：[www.panshenlian.com](http://www.panshenlian.com)，微信公众号：潘潘和他的朋友们。|
+潘深练，Java并发编程文档发起者，网名大晚，个人网站：http://www.panshenlian.com ，微信公众号：潘潘和他的朋友们。
 
 ***
 Powered by docsify
