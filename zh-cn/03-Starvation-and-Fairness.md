@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/starvation-and-fairness.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 If a thread is not granted CPU time because other threads grab it all, it is called "starvation". The thread is "starved to death" because other threads are allowed the CPU time instead of it. The solution to starvation is called "fairness" - that all threads are fairly granted a chance to execute.

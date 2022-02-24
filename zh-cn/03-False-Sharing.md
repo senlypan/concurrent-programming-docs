@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/false-sharing.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 `False sharing in Java` occurs when two threads running on two different CPUs write to two different variables which happen to be stored within the same CPU cache line. When the first thread modifies one of the variables - the whole CPU cache line is invalidated in the CPU caches of the other CPU where the other thread is running. This means, that the other CPUs need to reload the content of the invalidated cache line - even if they don't really need the variable that was modified within that cache line.

@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/java-memory-model.html  Update: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 The Java memory model specifies how the Java virtual machine works with the computer's memory (RAM). The Java virtual machine is a model of a whole computer so this model naturally includes a memory model - AKA the Java memory model.

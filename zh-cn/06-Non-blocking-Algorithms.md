@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/non-blocking-algorithms.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 Non-blocking algorithms in the context of concurrency are algorithms that allows threads to access shared state (or otherwise collaborate or communicate) without blocking the threads involved. In more general terms, an algorithm is said to be non-blocking if the suspension of one thread cannot lead to the suspension of other threads involved in the algorithm.

@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/read-write-locks.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 A read / write lock is more sophisticated lock than the Lock implementations shown in the text Locks in Java. Imagine you have an application that reads and writes some resource, but writing it is not done as much as reading it is. Two threads reading the same resource does not cause problems for each other, so multiple threads that want to read the resource are granted access at the same time, overlapping. But, if a single thread wants to write to the resource, no other reads nor writes must be in progress at the same time. To solve this problem of allowing multiple readers but only one writer, you will need a read / write lock.

@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/references.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 From time to time I get asked about what books and articles I have read before writing this Java concurrency tutorial. Concurrency is tricky so people often like to be able to double check my writing against other sources. Therefore I have collected this list of references of concurrency related books and articles that I have used in the writing of this Java concurrency tutorial.

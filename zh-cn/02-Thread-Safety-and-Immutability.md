@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/thread-safety-and-immutability.html  Update: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 [Race conditions](http://tutorials.jenkov.com/java-concurrency/race-conditions-and-critical-sections.html) occur only if multiple threads are accessing the same resource, and one or more of the threads write to the resource. If multiple threads read the same [resource race](http://tutorials.jenkov.com/java-concurrency/race-conditions-and-critical-sections.html) conditions do not occur.

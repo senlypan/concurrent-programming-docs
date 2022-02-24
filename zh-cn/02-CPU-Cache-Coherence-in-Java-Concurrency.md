@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/cache-coherence-in-java-concurrency.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 In some of the other tutorials in this Java Concurrency tutorial series you might have read, or heard me saying in a video, that when a Java thread writes to a volatile variable, or exits a synchronized block - that this flushes all variables visible to the thread from the CPU cache to main memory.

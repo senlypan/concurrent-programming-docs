@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/thread-congestion.html  Update: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 Thread congestion can occur when two or more threads are trying to access the same, guarded data structure at the same time. By "guarded" I mean that the data structure is guarded using synchronized blocks or a concurrent data structure (Lock, BlockingQueue etc.) so that the data structure is thread safe. The resulting thread congestion means that the threads trying to access the shared data structure are spending a high amount of time waiting in line to access the data structure - wasting valuable execution time on waiting.

@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/concurrency-vs-parallelism.html  Update: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 The terms concurrency and parallelism are often used in relation to multithreaded programs. At first it may seem as if concurrency and parallelism may be referring to the same concepts. However, concurrency and parallelism actually have different meanings. In this concurrency vs. parallelism tutorial I will explain what these concepts mean.

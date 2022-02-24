@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/single-threaded-concurrency.html  Update: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 Single-threaded Concurrency means making progress on more than one task at a time from within a single thread. Traditionally you would use multiple threads to make progress on more than one task at a time, with each thread making progress on its own task. Using traditional multithreaded concurrency the switching between different tasks was accomplished by the OS and CPU switching between different threads. However, using single-threaded concurrency techniques, a single thread can in fact make progress on multiple tasks by switching between making progress on each of the tasks. In this single-threaded concurrency tutorial I will explain how single-threaded concurrency works, and what benefits a single-threaded concurrency design gives.

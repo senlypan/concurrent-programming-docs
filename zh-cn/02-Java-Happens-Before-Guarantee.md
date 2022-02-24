@@ -4,7 +4,7 @@
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/java-happens-before-guarantee.html  Update: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译
+## ⛔抱歉，本文暂无中文翻译，持续更新中
 ?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
 
 The Java happens before guarantee is a set of rules that govern how the Java VM and CPU is allowed to reorder instructions for performance gains. The happens before guarantee makes it possible for threads to rely on when a variable value is synchronized to or from main memory, and which other variables have been synchronized at the same time. The Java happens before guarantee are centered around access to volatile variables and variables accessed from within synchronized blocks.

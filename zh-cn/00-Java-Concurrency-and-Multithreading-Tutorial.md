@@ -1,102 +1,102 @@
-# Java Concurrency and Multithreading Tutorial
+# Java并发与多线程介绍
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/index.html  Update: 2022-02-23
+> 原文: http://tutorials.jenkov.com/java-concurrency/index.html  最后更新: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+Java并发是一个涵盖Java平台上多线程、并发和并行性的术语。这里面就涉及到Java并发工具、并发问题和对应的解决方案。本Java并发编程文档内容基本涵盖了Java多线程知识中关于多线程、并发构造、并发问题、并发代价以及并发优点相关的核心概念。
 
-Java Concurrency is a term that covers multithreading, concurrency and parallelism on the Java platform. That includes the Java concurrency tools, problems and solutions. This Java concurrency tutorial covers the core concepts of multithreading, concurrency constructs, concurrency problems, costs, benefits related to multithreading in Java.
+## Java并发与多线程学习视频
 
-## Java Concurrency Tutorial Videos
+如果您喜欢视频，这里有一个视频播放列表，其中涵盖了本教程系列涵盖的一些相同主题。您可以在此处找到视频播放列表：
 
-If you prefer video, I have a playlist of videos covering some of the same topics that this tutorial series covers. You can find the video playlist here:
+[Java 并发与多线程 - 视频播放列表](https://www.youtube.com/playlist?list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4)
 
-[Java Concurrency & Multithreading - Video Playlist](https://www.youtube.com/playlist?list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4)
+## 什么是多线程？
 
-## What is Multithreading?
-
-Multithreading means that you have multiple threads of execution inside the same application. A thread is like a separate CPU executing your application. Thus, a multithreaded application is like an application that has multiple CPUs executing different parts of the code at the same time.
+多线程指的是在同一个应用程序中存在多个执行线程。每个线程就像都拥有一个独立的CPU在执行你的应用程序。因此，多线程应用程序看起来就像具备多CPU能力一样，能在同时刻执行应用程序中的不同代码片段。
 
 ![00-java-concurrency#introduction-1.png](http://tutorials.jenkov.com/images/java-concurrency/introduction-1.png)
 
 
-A thread is not equal to a CPU though. Usually a single CPU will share its execution time among multiple threads, switching between executing each of the threads for a given amount of time. It is also possible to have the threads of an application be executed by different CPUs.
+但是，线程不等同于CPU，通常单个CPU在多个线程之间执行时间是共享的，只不过CPU在每个线程获得一定执行时间片之后运行切换。当然，同一个应用程序中的不同线程也可以让不同的CPU来执行。
 
 ![00-java-concurrency#introduction-2.png](http://tutorials.jenkov.com/images/java-concurrency/introduction-2.png)
 
 
-## Why Multithreading?
+## 为什么要有多线程？
 
-There are several reasons as to why one would use multithreading in an application. Some of the most common reasons for multithreading are:
+关于为什么要在应用程序中使用多线程，通常有几个原因：
 
-- Better utilization of a single CPU.
-- Better utilization of multiple CPUs or CPU cores.
-- Better user experience with regards to responsiveness.
-- Better user experience with regards to fairness.
+- 更好地利用单个CPU。
+- 更好地利用多个CPU或多核CPU。
+- 在响应性方面更好的用户体验。
+- 在公平性方面更好的用户体验。
 
-I will explain each of these reasons in more detail in the following sections.
+我将在以下几点中更详细地解释这些原因。
 
-### Better Utilization of a Single CPU
+### 更好地利用单个 CPU
 
-One of the most common reasons is to be able to better utilize the resources in the computer. For instance, if one thread is waiting for the response to a request sent over the network, then another thread could use the CPU in the meantime to do something else. Additionally, if the computer has multiple CPUs, or if the CPU has multiple execution cores, then multithreading can also help your application utilize these extra CPU cores.
+最常见的原因之一是能够有效地利用计算机中的资源。 例如，一个线程通过网络发送请求之后处于等待响应中，此时其他线程可以利用CPU来做其他事情。另外，如果计算机是多CPU，或者多核CPU，那么多线程可以帮助您的应用程序有效利用这些额外的CPU内核资源。
 
-### Better Utilization of Multiple CPUs or CPU Cores
+### 更好地利用多个CPU或多核CPU
 
-If a computer contains multiple CPUs or the CPU contains multiple execution cores, then you need to use multiple threads for your application to be able to utilize all of the CPUs or CPU cores. A single thread can at most utilize a single CPU, and as I mentioned above, sometimes not even completely utilize a single CPU.
+如果计算机包含多个CPU或多核CPU，那么您需要使用多个线程来让您的应用程序能够更好地利用所有CPU或多核CPU资源。单个线程最多只能使用单个 CPU，而且正如以上提到的，有时甚至不能完全使用单个CPU（在多个线程共享CPU的情况下）。
 
-### Better User Experience with Regards to Responsiveness
+### 在响应性方面更好的用户体验
 
-Another reason to use multithreading is to provide a better user experience. For instance, if you click on a button in a GUI and this results in a request being sent over the network, then it matters which thread performs this request. If you use the same thread that is also updating the GUI, then the user might experience the GUI "hanging" while the GUI thread is waiting for the response for the request. Instead, such a request could be performed by a backgroun thread so the GUI thread is free to respond to other user requests in the meantime.
+使用多线程的另一个原因是提升用户体验。例如，你在用户图形界面（GUI）上点击一个按钮，此时按钮会发起一个网络请求，那么处理请求的线程如何执行就会显得很重要。如果你让当前处理线程也来负责用户图形界面的更新，那么由于这个线程处于等待请求响应中，用户会看到当前的用户图形界面被挂起。相反，如果这个请求让另外的后台线程去处理，那么用户图形界面线程在此期间就可以先自由地响应用户。
 
-### Better User Experience with Regards to Fairness
+?> 基本的设计理念：异步线程处理业务，同步线程提前响应，提供用户体验。
 
-A fourth reason is to share resources of a computer more fairly among users. As example imagine a server that receives requests from clients, and only has one thread to execute these requests. If a client sends a requests that takes a long time to process, then all other client's requests would have to wait until that one request has finished. By having each client's request executed by its own thread then no single task can monopolize the CPU completely.
+### 在公平性方面更好的用户体验
+
+第四个原因是所有用户之间更公平地共享计算机资源。例如，想象有一台服务器接收多个客户端的请求，并且只有一个线程在处理这些请求。如果其中一个客户端的请求处理了很长一段时间才完成，那么在这段时间内其他客户端请求都必须等待。因此通过多线程的设计，让每一个客户端请求都单独处理，并且不会让任何一个任务完全独占CPU。
+
+## 多线程与多任务
+
+在过去单CPU时代，单任务在一个时间点只能执行单一程序。大多数小型计算机的能力也都不足以同时执行多个程序，所以多线程、多任务都没有被尝试过。公平地说，与个人计算机相比，许多大型机系统已经能够一次执行多个程序很久了。
+
+### 多任务处理
+
+后来发展到多任务处理阶段，这意味着计算机在同一时间点并行执行多任务或多进程。不过这并不是真正意义上的“同时”。而是多个任务或进程共享一个CPU，并交由操作系统来完成多任务间对CPU的运行切换，以是的每个任务都有机会获得一定的时间片运行。
+
+随着多任务处理的出现，软件开发人员面临新的挑战，程序不在能假设独占所有的CPU时间、所有的内存和其他计算机资源。一个好的程序榜样是在其不再使用这些资源时对其进行释放，以使得其他程序能有机会使用这些资源。
+
+### 多线程
+
+再后来发展到多线程技术，使得在一个程序内部能拥有多个线程并行执行。一个线程的执行可以被认为是一个CPU在执行该程序。当一个程序运行在多线程下，就好像有多个CPU在同时执行该程序。
 
 
-## Multithreading vs. Multitasking
+## 多线程是具有挑战的
 
-Back in the old days a computer had a single CPU, and was only capable of executing a single program at a time. Most smaller computers were not really powerful enough to execute multiple programs at the same time, so it was not attempted. To be fair, many mainframe systems have been able to execute multiple programs at a time for many more years than personal computers.
-
-### Multitasking
-
-Later came multitasking which meant that computers could execute multiple programs (AKA tasks or processes) at the same time. It wasn't really "at the same time" though. The single CPU was shared between the programs. The operating system would switch between the programs running, executing each of them for a little while before switching.
-
-Along with multitasking came new challenges for software developers. Programs can no longer assume to have all the CPU time available, nor all memory or any other computer resources. A "good citizen" program should release all resources it is no longer using, so other programs can use them.
-
-### Multithreading
-
-Later yet came multithreading which mean that you could have multiple threads of execution inside the same program. A thread of execution can be thought of as a CPU executing the program. When you have multiple threads executing the same program, it is like having multiple CPUs execute within the same program.
-
-
-## Multithreading is Hard
-
-Multithreading can be a great way to increase the performance of some types of programs. However, mulithreading is even more challenging than multitasking. The threads are executing within the same program and are hence reading and writing the same memory simultaneously. This can result in errors not seen in a singlethreaded program. Some of these errors may not be seen on single CPU machines, because two threads never really execute "simultaneously". Modern computers, though, come with multi core CPUs, and even with multiple CPUs too. This means that separate threads can be executed by separate cores or CPUs simultaneously.
+在很多类型的程序中多线程被用来提升性能，但是多线程比多任务更加有挑战性。多线程是在同一个程序内部并行执行，因此会对相同的内存空间进行并发读写操作。这可能是在单线程程序中从来不会遇到的问题。其中的一些错误也未必会在单CPU机器上出现，因为两个线程从来不会得到真正的并行执行。然而，更现代的计算机伴随着多核CPU的出现，也就意味着不同的CPU内核能够真正意义并行执行不同的线程。
 
 ![00-java-concurrency#java-concurrency-tutorial-introduction-1.png](http://tutorials.jenkov.com/images/java-concurrency/java-concurrency-tutorial-introduction-1.png)
 
-If a thread reads a memory location while another thread writes to it, what value will the first thread end up reading? The old value? The value written by the second thread? Or a value that is a mix between the two? Or, if two threads are writing to the same memory location simultaneously, what value will be left when they are done? The value written by the first thread? The value written by the second thread? Or a mix of the two values written?
 
-Without proper precautions any of these outcomes are possible. The behaviour would not even be predictable. The outcome could change from time to time. Therefore it is important as a developer to know how to take the right precautions - meaning learning to control how threads access shared resources like memory, files, databases etc. That is one of the topics this Java concurrency tutorial addresses.
+如果一个线程在读一个内存时，另一个线程正向该内存进行写操作，那进行读操作的那个线程将获得什么结果呢？是写操作之前旧的值？还是写操作成功之后的新值？或是一半新一半旧的值？或者，如果是两个线程同时写同一个内存，在操作完成后将会是什么结果呢？是第一个线程写入的值？还是第二个线程写入的值？还是两个线程写入的一个混合值？
 
+如果没有适当的预防措施，任何这些结果都是可能的。这种行为甚至无法预测。结果可能会不时改变。因此，作为开发人员，了解如何采取正确的预防措施——学习控制线程如何访问共享资源，如内存、文件、数据库等等就显得非常重要，这也是本Java并发编程内容所涉及的主题之一。
 
-## Multithreading and Concurrency in Java
+## Java中的多线程和并发
 
-Java was one of the first languages to make multithreading easily available to developers. Java had multithreading capabilities from the very beginning. Therefore, Java developers often face the problems described above. That is the reason I am writing this trail on Java concurrency. As notes to myself, and any fellow Java developer whom may benefit from it.
+Java是最先支持多线程的开发的语言之一，Java从一开始就支持了多线程能力，因此Java开发者能常遇到上面描述的问题场景。这也是我想为Java并发技术而写这篇系列的原因。作为对自己的笔记，和对其他Java开发的追随者都可获益的。
 
-The trail will primarily be concerned with multithreading in Java, but some of the problems occurring in multithreading are similar to problems occurring in multitasking and in distributed systems. References to multitasking and distributed systems may therefore occur in this trail too. Hence the word "concurrency" rather than "multithreading".
+该系列主要关注Java多线程，但有些在多线程中出现的问题会和多任务以及分布式系统中出现的存在类似，因此该系列会将多任务和分布式系统方面作为参考，所以叫法上称为“并发性”，而不是“多线程”。
 
-## Concurrency Models
+## 并发模型
 
-The first Java concurrency model assumed that multiple threads executing within the same application would also share objects. This type of concurrency model is typically referred to as a "shared state concurrency model". A lot of the concurrency language constructs and utilities are designed to support this concurrency model.
+第一种Java并发模型，指的是在同一个应用程序中并行执行的线程会共享状态（共享状态通常指的是某些数据）。这种典型的并发模型称为 “共享状态并发模型” 。很多语言的并发架构和工具包，都是基于这种并发模型设计的。
 
-However, a lot has happened in the world of concurrent architecture and design since the first Java concurrency books were written, and even since the Java 5 concurrency utilities were released
+然而，在第一本Java并发书籍编写以来，同时在 Java 5 并发工具包发布至今，并发架构和设计发生了很多变化。
 
-The shared state concurrency model causes a lot of concurrency problems which can be hard to solve elegantly. Therefore, an alternative concurrency model referred to as "shared nothing" or "separate state" has gained popularity. In the separate state concurrency model the threads do not share any objects or data. This avoids a lot of the concurrent access problems of the shared state concurrency model.
+由于共享状态并发模型会带来一些难以优雅解决的并发问题，所以一种称为 “无共享” 或 “分离状态” 的替代并发模型已经流行起来，在分离状态并发模型中，线程不共享任何对象或数据，这避免了共享状态并发模型的很多并发访问问题。
 
-New, asynchronous "separate state" platforms and toolkits like Netty, Vert.x and Play / Akka and Qbit have emerged. New non-blocking concurrency algorithms have been published, and new non-blocking tools like the LMax Disrupter have been added to our toolkits. New functional programming parallelism has been introduced with the Fork and Join framework in Java 7, and the collection streams API in Java 8.
+近年来，异步 “分离状态” 平台和工具包如 Netty、Vert.x 和 Play / Akka 和 Qbit 已经出现，也发布了新的非阻塞并发算法，并且新的非阻塞工具（如 LMax Disrupter）也已添加到我们的工具包中。Java 7 中的 Fork 和 Join 框架以及 Java 8 中的集合流 API 都引入了这种新的函数式并行编程。
 
-With all these new developments it is about time that I updated this Java Concurrency tutorial. Therefore, this tutorial is once again **work in progress**. New tutorials will be published whenever time is available to write them.
+随着所有这些新的发展，我是时候更新这个Java并发教程了。因此，本教程再次进行完善。在时间允许的情况下回继续编写新教程、陆续发布。
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/java-concurrency-thread/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
