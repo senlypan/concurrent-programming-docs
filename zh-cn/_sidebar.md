@@ -48,6 +48,7 @@
   * [重入锁](zh-cn/04-Reentrance-Lockout.md)
   * [信号量](zh-cn/04-Semaphores.md)
   * [阻塞队列](zh-cn/04-Blocking-Queues.md)
+  * [生产者消费者模式](zh-cn/04-The-Producer-Consumer-Pattern)
   * [线程池](zh-cn/04-Thread-Pools.md)
   * [CAS](zh-cn/04-Compare-and-Swap.md)
 

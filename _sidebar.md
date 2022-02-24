@@ -48,6 +48,7 @@
   * [Reentrance Lockout](en-us/04-Reentrance-Lockout.md)
   * [Semaphores](en-us/04-Semaphores.md)
   * [Blocking Queues](en-us/04-Blocking-Queues.md)
+  * [The Producer Consumer Pattern](en-us/04-The-Producer-Consumer-Pattern)
   * [Thread Pools](en-us/04-Thread-Pools.md)
   * [Compare and Swap](en-us/04-Compare-and-Swap.md)
 
