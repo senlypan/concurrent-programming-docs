@@ -1,30 +1,29 @@
-# Multithreading Costs
+# 多线程的代价
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/costs.html  Update: 2022-02-23
+> 原文: http://tutorials.jenkov.com/java-concurrency/costs.html 最后更新: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译，持续更新中
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+从一个单线程的应用到一个多线程的应用并不仅仅带来好处，它也会有一些代价。不要仅仅为了使用多线程而使用多线程。而应该明确在使用多线程时能多来的好处比所付出的代价大的时候，才使用多线程。如果存在疑问，应该尝试测量一下应用程序的性能和响应能力，而不只是猜测。
 
-Going from a singlethreaded to a multithreaded application doesn't just provide benefits. It also has some costs. Don't just multithread-enable an application just because you can. You should have a well-founded expectation that the benefits gained by doing so are larger than the costs. When in doubt, try measuring the performance or responsiveness of the application, instead of just guessing.
+## 设计更复杂
 
-## More complex design
+虽然有一些多线程应用程序比单线程的应用程序要简单，但其他的一般都更复杂。在多线程访问共享数据的时候，这部分代码特别需要注意。线程之间的交互往往非常复杂。不正确的线程同步产生的错误非常难以被发现、重现以及修复。
 
-Though some parts of a multithreaded applications are simpler than a singlethreaded application, other parts are more complex. Code executed by multiple threads accessing shared data need special attention. Thread interaction is far from always simple. Errors arising from incorrect thread synchronization can be very hard to detect, reproduce and fix.
+## 上下文切换的开销
 
-## Context Switching Overhead
+当CPU从执行一个线程切换到执行另外一个线程的时候，它需要先存储当前线程的本地的数据，程序指针等，然后载入另一个线程的本地数据，程序指针等，最后才开始执行。这种切换称为“上下文切换”(“context switch”)。CPU会在一个上下文中执行一个线程，然后切换到另外一个上下文中执行另外一个线程。
 
-When a CPU switches from executing one thread to executing another, the CPU needs to save the local data, program pointer etc. of the current thread, and load the local data, program pointer etc. of the next thread to execute. This switch is called a "context switch". The CPU switches from executing in the context of one thread to executing in the context of another.
+上下文切换并不廉价。如果没有必要，应该减少上下文切换的发生。
 
-Context switching isn't cheap. You don't want to switch between threads more than necessary.
-
-You can read more about context switching on Wikipedia:
+你可以通过维基百科阅读更多的关于上下文切换相关的内容：
 
 http://en.wikipedia.org/wiki/Context_switch
 
-## Increased Resource Consumption
+## 增加资源消耗
 
-A thread needs some resources from the computer in order to run. Besides CPU time a thread needs some memory to keep its local stack. It may also take up some resources inside the operating system needed to manage the thread. Try creating a program that creates 100 threads that does nothing but wait, and see how much memory the application takes when running.
+线程在运行的时候需要从计算机里面得到一些资源。除了CPU，线程还需要一些内存来维持它本地的堆栈。它也需要占用操作系统中一些资源来管理线程。我们可以尝试编写一个程序，让它创建100个线程，这些线程什么事情都不做，只是在等待，然后看看这个程序在运行的时候占用了多少内存。
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/benefits/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~

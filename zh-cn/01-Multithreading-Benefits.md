@@ -1,53 +1,51 @@
-# Multithreading Benefits
+# 多线程的优点
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/benefits.html  Update: 2022-02-23
+> 原文: http://tutorials.jenkov.com/java-concurrency/benefits.html  最后更新: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译，持续更新中
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+多线程最显着的好处是：
 
-The most significant benefits of multithreading are:
+- 更好的 CPU 利用率。
+- 程序设计在某些情况下更简单。
+- 程序响应速度更快。
+- 不同任务之间的 CPU 资源分配更公平。
 
-- Better CPU utilization.
-- Simpler program design in some situations.
-- More responsive programs.
-- More fair division of CPU resources between different tasks.
+## 更好的 CPU 利用率
 
-## Better CPU Utilization
-
-Imagine an application that reads and processes files from the local file system. Lets say that reading a file from disk takes 5 seconds and processing it takes 2 seconds. Processing two files then takes
+想象一个应用程序从本地文件系统中读取和处理文件的情景。比方说，从磁盘读取一个文件需要5秒，处理一个文件需要2秒。处理两个文件则需要：
 
 ```text
-  5 seconds reading file A
-  2 seconds processing file A
-  5 seconds reading file B
-  2 seconds processing file B
+  读取文件 A 花费 5 秒
+  处理文件 A 花费 2 秒
+  读取文件 B 花费 5 秒
+  处理文件 B 花费 2 秒
 -----------------------
- 14 seconds total
+    总共需要花费 14 秒
 ```
 
-When reading the file from disk most of the CPU time is spent waiting for the disk to read the data. The CPU is pretty much idle during that time. It could be doing something else. By changing the order of the operations, the CPU could be better utilized. Look at this ordering:
+从磁盘中读取文件的时候，大部分的CPU时间用于等待磁盘去读取数据。在这段时间里，CPU非常的空闲。它可以做一些别的事情。通过改变操作的顺序，就能够更好的使用CPU资源。看下面的顺序：
 
 ```text 
-  5 seconds reading file A
-  5 seconds reading file B + 2 seconds processing file A
-  2 seconds processing file B
+  读取文件 A 花费 5 秒
+  读取文件 B 花费 5 秒 + 处理文件 A 花费 2 秒
+  处理文件 B 花费 2 秒
 -----------------------
- 12 seconds total
+    总共需要花费 12 秒
 ```
 
-The CPU waits for the first file to be read. Then it starts the read of the second file. While the second file is being read in by the IO components of the computer, the CPU processes the first file. Remember, while waiting for the file to be read from disk, the CPU is mostly idle.
+CPU等待第一个文件被读取完。然后开始读取第二个文件。当第二文件在被读取的时候，CPU会去处理第一个文件。记住，在等待磁盘读取文件的时候，CPU大部分时间是空闲的。
 
-In general, the CPU can be doing other things while waiting for IO. It doesn't have to be disk IO. It can be network IO as well, or input from a user at the machine. Network and disk IO is often a lot slower than CPU's and memory IO.
+总的说来，CPU能够在等待IO的时候做一些其他的事情。这个不一定就是磁盘IO。它也可以是网络的IO，或者用户输入。通常情况下，网络和磁盘的IO比CPU和内存的IO慢的多。
 
-## Simpler Program Design
+## 程序设计在某些情况下更简单
 
-If you were to program the above ordering of reading and processing by hand in a singlethreaded application, you would have to keep track of both the read and processing state of each file. Instead you can start two threads that each just reads and processes a single file. Each of these threads will be blocked while waiting for the disk to read its file. While waiting, other threads can use the CPU to process the parts of the file they have already read. The result is, that the disk is kept busy at all times, reading from various files into memory. This results in a better utilization of both the disk and the CPU. It is also easier to program, since each thread only has to keep track of a single file.
+如果要在单线程应用程序中手动编写上述读取和处理顺序，你必须记录每个文件读取和处理的状态。相反，你可以启动两个线程，每个线程处理一个文件的读取和操作。线程会在等待磁盘读取文件的过程中被阻塞。在等待的时候，其他的线程能够使用CPU去处理已经读取完的文件。其结果就是，磁盘总是在繁忙地读取不同的文件到内存中。这样可以更好地利用磁盘和 CPU。它也更容易编程，因为每个线程只需要跟踪一个文件。
 
-## More Responsive Programs
+## 程序响应速度更快
 
-Another common goal for turning a singlethreaded application into a multithreaded application is to achieve a more responsive application. Imagine a server application that listens on some port for incoming requests. when a request is received, it handles the request and then goes back to listening. The server loop is sketched below:
+将一个单线程应用程序变成多线程应用程序的另一个常见的目的是实现一个响应更快的应用程序。设想一个服务器应用，它在某一个端口监听进来的请求。当一个请求到来时，它去处理这个请求，然后再返回去监听。
+服务器的流程如下所述：
 
 ```java
 
@@ -58,9 +56,9 @@ Another common goal for turning a singlethreaded application into a multithreade
 
 ```
 
-If the request takes a long time to process, no new clients can send requests to the server for that duration. Only while the server is listening can requests be received.
+如果一个请求需要占用大量的时间来处理，在这段时间内新的客户端就无法发送请求给服务端。只有服务器在监听的时候，请求才能被接收。
 
-An alternate design would be for the listening thread to pass the request to a worker thread, and return to listening immediatedly. The worker thread will process the request and send a reply to the client. This design is sketched below:
+另一种设计是，监听线程把请求传递给工作者线程(worker thread)，然后立刻返回去监听。而工作者线程则能够处理这个请求并发送一个回复给客户端。这种设计如下所述：
 
 ```java
 
@@ -71,14 +69,16 @@ An alternate design would be for the listening thread to pass the request to a w
 
 ```
 
-This way the server thread will be back at listening sooner. Thus more clients can send requests to the server. The server has become more responsive.
+这种方式，服务端线程迅速地返回去监听。因此，更多的客户端能够发送请求给服务端。这个服务也显得响应速度更快。
 
-The same is true for desktop applications. If you click a button that starts a long task, and the thread executing the task is the thread updating the windows, buttons etc., then the application will appear unresponsive while the task executes. Instead the task can be handed off to a worker thread. While the worker thread is busy with the task, the window thread is free to respond to other user requests. When the worker thread is done it signals the window thread. The window thread can then update the application windows with the result of the task. The program with the worker thread design will appear more responsive to the user.
+桌面应用也是同样如此。如果你点击一个按钮开始运行一个耗时的任务，这个线程既要执行任务又要更新窗口和按钮，那么在任务执行的过程中，这个应用程序看起来好像没有反应一样。相反，任务可以传递给工作者线程（word thread)。当工作者线程在繁忙地处理任务的时候，窗口线程可以自由地响应其他用户的请求。当工作者线程完成任务的时候，它发送信号给窗口线程。窗口线程便可以更新应用程序窗口，并显示任务的结果。对用户而言，这种具有工作者线程设计的程序显得响应速度更快。
 
-## More Fair Distribution of CPU Resources
+## 不同任务之间的 CPU 资源分配更公平
 
-Imagine a server that is receiving requests from clients. Imagine then, that one of the clients sends a request that takes a long time to process - e.g. 10 seconds. If the server processed all tasks using a single thread, then all requests following the request that was slow to process would be forced to wait until the full request has been processed.
+想象一个服务器正在接收来自客户端的请求。譬如，其中一个客户端发送了一个需要处理很长时间的请求 - 例如 10 秒。如果服务器使用单个线程处理所有任务，那么在这个处理缓慢的请求之后进来的所有请求都将被迫等待，直到处理完完整请求。
 
-By dividing the CPU time between multiple threads and switching between the threads, then the CPU can share its execution time more fairly between several requests. Then even if one of the requests is slow, other requests that are faster to process can be executed concurrently with the slower request. Of course this means that executing the slow request will be even slower, since it will not have the CPU solely allocated to processing just it. However, the other requests will have to wait shorter time to be processed, because they do not have to wait for the slow tasks to finish before they can be processed. In the event that there is only the slow request to process, then the CPU can still be solely allocated to the slow task.
+通过在多个线程之间划分 CPU 时间片并在线程之间切换，CPU 可以在多个请求之间更公平地共享其执行时间。那么即使其中一个请求很慢，其他处理速度较快的请求也可以与较慢的请求同时执行。当然，这意味着执行慢的请求会变得更慢，因为不会单独分配 CPU 来处理它。但是，其他请求将不得不等待更短的时间来处理，因为它们不必等待慢速任务完成才能被处理。如果只有慢请求需要处理，那么 CPU 仍然可以单独分配给慢任务。
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/benefits/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
