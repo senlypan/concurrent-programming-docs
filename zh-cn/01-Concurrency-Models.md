@@ -1,206 +1,207 @@
-# Concurrency Models
+# 并发模型
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/concurrency-models.html  Update: 2022-02-23
+> 原文: http://tutorials.jenkov.com/java-concurrency/concurrency-models.html 最后更新: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译，持续更新中
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+并发系统可以采用多种并发编程模型来实现。并发模型指定了系统中的线程如何通过协作来完成分配给它们的作业。不同的并发模型采用不同的方式拆分作业，同时线程间的协作和交互方式也不相同。这篇并发模型教程将深入探讨撰写本文时（2015-2019）使用的最流行的几种并发模型。
 
-Concurrent systems can be implemented using different concurrency models. A concurrency model specifies how threads in the the system collaborate to complete the tasks they are are given. Different concurrency models split the tasks in different ways, and the threads may communicate and collaborate in different ways. This concurrency model tutorial will dive a bit deeper into the most popular concurrency models in use at the time of writing (2015 - 2019).
+## 并发模型和分布式系统的相似之处
 
-## Concurrency Models and Distributed System Similarities
+本文所描述的并发模型类似于分布式系统中使用的很多体系结构。在并发系统中线程之间可以相互通信。在分布式系统中进程之间也可以相互通信（进程有可能在不同的机器中）。线程和进程之间具有很多相似的特性。这也就是为什么很多并发模型通常类似于各种分布式系统架构
 
-The concurrency models described in this text are similar to different architectures used in distributed systems. In a concurrent system different threads communicate with each other. In a distributed system different processes communicate with each other (possibly on different computers). Threads and processes are quite similar to each other in nature. That is why the different concurrency models often look similar to different distributed system architectures.
+当然，分布式系统有额外的挑战，网络可能会出现故障，或者远程计算机或进程出现故障等。但是在大型服务器上运行的并发系统可能会遇到类似的问题，例如 CPU 故障、网卡故障、磁盘故障等等。失败的概率可能会更低，但理论上它仍然可以发生。
 
-Of course distributed systems have the extra challenge that the network may fail, or a remote computer or process is down etc. But a concurrent system running on a big server may experience similar problems if a CPU fails, a network card fails, a disk fails etc. The probability of failure may be lower, but it can theoretically still happen.
+由于并发模型类似于分布式系统架构，因此它们通常可以互相借鉴思想。例如，为工作线程（worker threads）之间分配工作的模型通常类似于 [分布式系统中的负载平衡](http://tutorials.jenkov.com/software-architecture/load-balancing.html) 模型。同样，在日志记录、故障转移、任务幂等性等错误处理技术上也是如此。
 
-Because concurrency models are similar to distributed system architectures, they can often borrow ideas from each other. For instance, models for distributing work among workers (threads) are often similar to models of [load balancing in distributed systems](http://tutorials.jenkov.com/software-architecture/load-balancing.html). The same is true of error handling techniques like logging, fail-over, idempotency of tasks etc.
+## 共享状态与分离状态
 
-## Shared State vs. Separate State
+并发模型的一个重要方面是，组件和线程是否被设计为在线程之间共享状态，或者具有从不在线程之间共享的单独状态。
 
-One important aspect of a concurrency model is, whether the components and threads are designed to share state among the threads, or to have separate state which is never shared among the threads.
+状态是指一些数据，通常是一个或多个对象或类似的。当线程共享状态时，可能会出现竞争条件 和死锁等问题。当然，这取决于线程如何使用和访问共享对象。
 
-Shared state means that the different threads in the system will share some state among them. By state is meant some data, typically one or more objects or similar. When threads share state, problems like [race conditions](http://tutorials.jenkov.com/java-concurrency/race-conditions-and-critical-sections.html) and [deadlock](http://tutorials.jenkov.com/java-concurrency/deadlock.html) etc. may occur. It depends on how the threads use and access the shared objects, of course.
+共享状态意味着系统中的不同线程之间会共享一些状态，这些状态通常指一些数据，可能是一个或多个对象。当线程共享状态时，可能会出现例如 [资源竞争](http://tutorials.jenkov.com/java-concurrency/race-conditions-and-critical-sections.html) 和 [死锁](http://tutorials.jenkov.com/java-concurrency/deadlock.html) 等问题。 当然，这要取决于线程之间是如何使用和访问共享对象的。
 
 ![01-Concurrency-Models#concurrency-models-0-1.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-0-1.png)
 
-Separate state means that the different threads in the system do not share any state among them. In case the different threads need to communicate, they do so either by exchanging immutable objects among them, or by sending copies of objects (or data) among them. Thus, when no two threads write to the same object (data / state), you can avoid most of the common concurrency problems.
+分离状态是指系统中的不同线程之间不共享任何状态。如果不同的线程需要通信，它们要么通过在它们之间交换不可变对象，要么通过在它们之间发送对象（或数据）的副本来实现。因此，当没有两个线程写入同一个对象（数据/状态）时，可以避免大多数常见的并发问题。
 
 ![01-Concurrency-Models#concurrency-models-0-2.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-0-2.png)
 
-Using a separate state concurrency design can often make some parts of the code easier to implement and easier to reason about, since you know that only one thread will ever write to a given object. You don't have to worry about concurrent access to that object. However, you might have to think a bit harder about the application design in the big picture, to use separate state concurrency. It's worth it though, I feel. Personally I prefer separate state concurrency designs.
+使用单独的状态并发设计通常可以使代码的某些部分更易于实现和推理，因为您知道只有一个线程会写入给定对象。您不必担心对该对象的并发访问。但是，您可能需要从大局考虑应用程序设计，以使用单独的状态并发。不过还是值得的，我觉得。我个人更喜欢单独的状态并发设计。
 
-## Parallel Workers
+## 并行工作者模型
 
-The first concurrency model is what I call the parallel workers model. Incoming jobs are assigned to different workers. Here is a diagram illustrating the parallel workers concurrency model:
+第一种并发模型就是我所说的并行工作者模型。传入的作业会被分配到不同的工作者上。下图展示了并行工作者模型：
 
 ![01-Concurrency-Models#concurrency-models-1.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-1.png)
 
-In the parallel workers concurrency model a delegator distributes the incoming jobs to different workers. Each worker completes the full job. The workers work in parallel, running in different threads, and possibly on different CPUs.
+在并行工作者模型中，委派者（Delegator）将传入的作业分配给不同的工作者。每个工作者完成整个任务。工作者们并行运作在不同的线程上，甚至可能在不同的CPU上。
 
-If the parallel workers model was implemented in a car factory, each car would be produced by one worker. The worker would get the specification of the car to build, and would build everything from start to end.
+如果在某个汽车厂里实现了并行工作者模型，每台车都会由一个工人来生产。工人们将拿到汽车的生产规格，并且从头到尾负责所有工作。
 
-The parallel workers concurrency model is the most commonly used concurrency model in Java applications (although that is changing). Many of the concurrency utilities in the java.util.concurrent Java package are designed for use with this model. You can also see traces of this model in the design of the Java Enterprise Edition application servers.
+在Java应用系统中，并行工作者模型是最常见的并发模型（即使正在转变）。[java.util.concurrent](http://tutorials.jenkov.com/java-util-concurrent/index.html) 这个并发包中很多工具都是基于这个模型设计的。你也可以在Java企业级（J2EE）应用服务器的设计中看到这个模型的影子。
 
-The parallel workers concurrency model can be designed to use both shared state or separate state, meaning the workers either has access to some shared state (shared objects or data), or they have no shared state.
+并行工作者并发模型可以设计为使用共享状态或分离状态，这意味着工作者要么可以访问某些共享状态（共享对象或数据），要么没有共享状态。
 
-## Parallel Workers Advantages
+## 并行工作者模型的优点
 
-The advantage of the parallel workers concurrency model is that it is easy to understand. To increase the parallelization level of the application you just add more workers.
+并行工作者模型的优点是，它很容易理解。你只需添加更多的工作者来提高系统的并行度。
 
-For instance, if you were implementing a web crawler, you could crawl a certain amount of pages with different numbers of workers and see which number gives the shortest total crawl time (meaning the highest performance). Since web crawling is an IO intensive job you will probably end up with a few threads per CPU / core in your computer. One thread per CPU would be too little, since it would be idle a lot of the time while waiting for data to download.
+举个例子，如果你正在做一个网络爬虫，可以试试使用不同数量的工作者抓取到一定数量的页面，然后看看多少数量的工作者消耗的时间最短（意味着性能最高）。由于网络爬虫是一个IO密集型工作，最终结果很有可能是你电脑中的每个CPU或每个核分配了几个线程。每个CPU若只分配一个线程可能有点少，因为在等待数据下载的过程中CPU将会空闲大量时间。
 
-## Parallel Workers Disadvantages
+## 并行工作者模型的缺点
 
-The parallel workers concurrency model has some disadvantages lurking under the simple surface, though. I will explain the most obvious disadvantages in the following sections.
+并行工作者模型虽然看起来简单，却隐藏着一些缺点。接下来的章节中我会分析一些比较明显的不足。
 
-### Shared State Can Get Complex
+### 共享状态可能会很复杂
 
-In case the shared workers need access to some kind of shared data, either in memory or in a shared database, managing correct concurrent access can get complex. The following diagram shows how this complicates the parallel worker concurrency model:
+在实际应用中，并行工作者模型可能比前面所描述的情况要复杂得多。共享的工作者经常需要访问一些共享数据，无论是内存中的或者共享的数据库中的。下图展示了并行工作者模型是如何变得复杂的：
 
 ![01-Concurrency-Models#concurrency-models-2.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-2.png)
 
-Some of this shared state is in communication mechanisms like job queues. But some of this shared state is business data, data caches, connection pools to the database etc.
+其中一些共享状态存在于通信机制中，例如作业队列。但其中一些共享状态是业务数据、数据缓存、数据库连接池等。
 
-As soon as shared state sneaks into the parallel workers concurrency model it starts getting complicated. The threads need to access the shared data in a way that makes sure that changes by one thread are visible to the others (pushed to main memory and not just stuck in the CPU cache of the CPU executing the thread). Threads need to avoid [race conditions](http://tutorials.jenkov.com/java-concurrency/race-conditions-and-critical-sections.html) , [deadlock](http://tutorials.jenkov.com/java-concurrency/deadlock.html) and many other shared state concurrency problems.
+一旦共享状态潜入到并行工作者模型中，将会使情况变得复杂起来。线程需要以某种方式存取共享数据，以确保某个线程的修改能够对其他线程可见（数据修改需要同步到主存中，不仅仅将数据保存在执行这个线程的CPU的缓存中）。线程需要避免 [资源竞争](http://tutorials.jenkov.com/java-concurrency/race-conditions-and-critical-sections.html) , [死锁](http://tutorials.jenkov.com/java-concurrency/deadlock.html) 以及其他一些由于共享状态而导致的并发问题。
 
-Additionally, part of the parallelization is lost when threads are waiting for each other when accessing the shared data structures. Many concurrent data structures are blocking, meaning one or a limited set of threads can access them at any given time. This may lead to contention on these shared data structures. High contention will essentially lead to a degree of serialization of execution (eliminating parallelization) of the part of the code that access the shared data structures.
+此外，在等待访问共享数据结构时，线程之间的互相等待将会丢失部分并行性。许多并发数据结构是阻塞的，意味着在任何一个时间只有一个或者很少的线程能够访问。这样会导致在这些共享数据结构上出现竞争状态。在执行需要访问共享数据结构部分的代码时，高竞争基本上会导致执行时出现一定程度的串行化。
 
-Modern [non-blocking concurrency algorithms](http://tutorials.jenkov.com/java-concurrency/non-blocking-algorithms.html) may decrease contention and increase performance, but non-blocking algorithms are hard to implement.
+现在的 [非阻塞并发算法](http://tutorials.jenkov.com/java-concurrency/non-blocking-algorithms.html) 也许可以降低竞争并提升性能，但是非阻塞算法的实现比较困难。
 
-Persistent data structures are another alternative. A persistent data structure always preserves the previous version of itself when modified. Thus, if multiple threads point to the same persistent data structure and one thread modifies it, the modifying thread gets a reference to the new structure. All other threads keep a reference to the old structure which is still unchanged and thus consistent. The Scala standard APIs contain several persistent data structures.
+可持久化的数据结构是另一种选择。在修改的时候，可持久化的数据结构总是保护它的前一个版本不受影响。因此，如果多个线程指向同一个可持久化的数据结构，并且其中一个线程进行了修改，进行修改的线程会获得一个指向新结构的引用。所有其他线程保持对旧结构的引用，旧结构没有被修改并且因此保证一致性。Scala 标准 API 包含几个持久数据结构。
 
-While persistent data structures are an elegant solution to concurrent modification of shared data structures, persistent data structures tend not to perform that well.
+【注：这里的可持久化数据结构不是指持久化存储，而是一种数据结构，比如Java中的String类，以及CopyOnWriteArrayList类，具体可参考】
 
-For instance, a persistent list will add all new elements to the head of the list, and return a reference to the newly added element (which then point to the rest of the list). All other threads still keep a reference to the previously first element in the list, and to these threads the list appear unchanged. They cannot see the newly added element.
+虽然可持久化的数据结构在解决共享数据结构的并发修改时显得很优雅，但是可持久化的数据结构的表现往往不尽人意。
 
-Such a persistent list is implemented as a linked list. Unfortunately linked lists don't perform very well on modern hardware. Each element in the list is a separate object, and these objects can be spread out all over the computer's memory. Modern CPUs are much faster at accessing data sequentially, so on modern hardware you will get a lot higher performance out of a list implemented on top of an array. An array stores data sequentially. The CPU caches can load bigger chunks of the array into the cache at a time, and have the CPU access the data directly in the CPU cache once loaded. This is not really possible with a linked list where elements are scattered all over the RAM.
+比如说，一个可持久化的链表需要在头部插入一个新的节点，并且返回指向这个新加入的节点的一个引用（这个节点指向了链表的剩余部分）。所有其他线程仍然保留对列表中先前第一个元素的引用，并且对于这些线程，列表看起来没有变化。他们看不到新添加的元素。
 
-### Stateless Workers
+这种可持久化的列表采用链表来实现。不幸的是链表在现代硬件上表现的不太好。链表中得每个元素都是一个独立的对象，这些对象可以遍布在整个计算机内存中。现代CPU能够更快的进行顺序访问，所以你可以在现代的硬件上用数组实现的列表，以获得更高的性能。数组可以顺序的保存数据。CPU缓存能够一次加载数组的一大块进行缓存，一旦加载完成CPU就可以直接访问缓存中的数据。这对于元素散落在RAM中的链表来说，不太可能做得到。
 
-Shared state can be modified by other threads in the system. Therefore workers must re-read the state every time they need it, to make sure they are working on the latest copy. This is true no matter whether the shared state is kept in memory or in an external database. A worker that does not keep state internally (but re-reads it every time it is needed) is called stateless .
+### 无状态的工作者
 
-Re-reading data every time you need it can get slow. Especially if the state is stored in an external database.
+共享状态可以被系统中的其他线程修改。因此，工作人员必须在每次需要时重新读取状态，以确保他们正在处理最新的副本。无论共享状态是保存在内存中还是保存在外部数据库中，都是如此。内部不保存状态（但每次需要时都会重新读取）的工作者称为无状态。
 
-### Job Ordering is Nondeterministic
+每次需要时重新读取数据，可能会导致速度变慢，特别是状态保存在外部数据库中的时候。
 
-Another disadvantage of the parallel worker model is that the job execution order is nondeterministic. There is no way to guarantee which jobs are executed first or last. Job A may be given to a worker before job B, yet job B may be executed before job A.
+### 任务顺序是不确定的
 
-The nondeterministic nature of the parallel worker model makes it hard to reason about the state of the system at any given point in time. It also makes it harder (if not impossible) to guarantee that one task finishes before another. This does not always cause problems, however. It depends on the needs of the system.
+并行工作者模型的另一个缺点是作业执行顺序是不确定的。无法保证首先执行哪些作业或最后执行哪些作业。作业A可能在作业B之前就被分配工作者了，但是作业B反而有可能在作业A之前执行。
 
-## Assembly Line
+并行工作者模型的这种不确定性，使得很难在任何特定的时间点推断系统的状态。这也使得保证一项任务先于另一项任务完成变得更加困难（如果不是不可能的话）。然而，这并不总是导致问题。这取决于系统的需要。
 
-The second concurrency model is what I call the assembly line concurrency model. I chose that name just to fit with the "parallel worker" metaphor from earlier. Other developers use other names (e.g. reactive systems, or event driven systems) depending on the platform / community. Here is a diagram illustrating the assembly line concurrency model:
+## 流水线模型（串行模型）
+
+第二种并发模型就是我所说的流水线并发模型。我选择这个名字只是为了符合前面提到的“并行工作者”的比喻。其他开发人员根据平台/社区使用其他名称（例如反应式系统或事件驱动系统）。这是一个说明流水线并发模型的图表：
 
 ![01-Concurrency-Models#concurrency-models-3.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-3.png)
 
-The workers are organized like workers at an assembly line in a factory. Each worker only performs a part of the full job. When that part is finished the worker forwards the job to the next worker.
+工人像工厂流水线上的工人一样被组织起来。每个工人只完成全部工作的一部分。当该部分完成后，工人将工作转发给下一个工人。
 
-Systems using the assembly line concurrency model are usually designed to use non-blocking IO. Non-blocking IO means that when a worker starts an IO operation (e.g. reading a file or data from a network connection) the worker does not wait for the IO call to finish. IO operations are slow, so waiting for IO operations to complete is a waste of CPU time. The CPU could be doing something else in the meanwhile. When the IO operation finishes, the result of the IO operation ( e.g. data read or status of data written) is passed on to another worker.
+使用流水线并发模型的系统通常设计为使用非阻塞 IO。非阻塞 IO 意味着当工作人员开始 IO 操作（例如从网络连接读取文件或数据）时，工作人员不会等待 IO 调用完成。IO 操作很慢，所以等待 IO 操作完成是对 CPU 时间的浪费。与此同时，CPU 可能正在做其他事情。当 IO 操作完成时，IO 操作的结果（例如数据读取或数据写入状态）将传递给另一个工作人员。
 
-With non-blocking IO, the IO operations determine the boundary between workers. A worker does as much as it can until it has to start an IO operation. Then it gives up control over the job. When the IO operation finishes, the next worker in the assembly line continues working on the job, until that too has to start an IO operation etc.
+使用非阻塞 IO，IO 操作决定了 worker 之间的边界。一个工作人员尽可能多地做，直到它必须开始一个 IO 操作。然后它放弃了对工作的控制。当 IO 操作完成时，流水线中的下一个工人继续工作，直到也必须开始 IO 操作等。
 
 ![01-Concurrency-Models#concurrency-models-4.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-4.png)
 
-In reality, the jobs may not flow along a single assembly line. Since most systems can perform more than one job, jobs flows from worker to worker depending on what part of the job that needs to be executed next. In reality there could be multiple different virtual assembly lines running on at the same time. This is how the job flow through an assembly line system might look in reality:
+实际上，这些工作可能不会沿着一条流水线流动。由于大多数系统可以执行多个作业，因此作业从一个工作人员流向另一个工作人员，这取决于接下来需要执行工作的哪一部分。实际上，可能有多个不同的虚拟流水线同时运行。这就是通过流水线系统的工作流在现实中的样子：
 
 ![01-Concurrency-Models#concurrency-models-5.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-5.png)
 
-Jobs may even be forwarded to more than one worker for concurrent processing. For instance, a job may be forwarded to both a job executor and a job logger. This diagram illustrates how all three assembly lines finish off by forwarding their jobs to the same worker (the last worker in the middle assembly line):
+作业甚至也有可能被转发到超过一个工作者上并发处理。比如说，作业有可能被同时转发到作业执行器和作业日志器。下图说明了三条流水线是如何通过将作业转发给同一个工作者（中间流水线的最后一个工作者）来完成作业:
 
 ![01-Concurrency-Models#concurrency-models-6.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-6.png)
 
-The assembly lines can get even more complex than this.
+流水线可以变得比这更复杂。
 
-### Reactive, Event Driven Systems
+### 响应式、事件驱动系统
 
-Systems using an assembly line concurrency model are also sometimes called reactive systems, or event driven systems. The system's workers react to events occurring in the system, either received from the outside world or emitted by other workers. Examples of events could be an incoming HTTP request, or that a certain file finished loading into memory etc.
-
-At the time of writing, there are a number of interesting reactive / event driven platforms available, and more will come in the future. Some of the more popular ones seems to be:
+采用流水线并发模型的系统有时候也称为响应式系统或事件驱动系统。系统内的工作者对系统内出现的事件做出响应，这些事件有可能来自于外部系统或者内部其他工作者。事件可以是传入的HTTP请求，也可以是某个文件成功加载到内存中等。在写这篇文章的时候，已经有很多有趣的响应式/事件驱动平台可以使用了，并且不久的将来会有更多。比较流行的似乎是这几个：
 
 - [Vert.x](http://tutorials.jenkov.com/vert.x/index.html)
 - Akka
 - Node.JS (JavaScript)
 
-Personally I find Vert.x to be quite interesting (especially for a Java / JVM dinosaur like me).
+我个人觉得Vert.x是相当有趣的（特别是对于我这样使用Java/JVM的人来说）
 
 ### Actors vs. Channels
 
-Actors and channels are two similar examples of assembly line (or reactive / event driven) models.
+Actors 和 channels 是两种比较类似的流水线（或响应式/事件驱动）模型。
 
-In the actor model each worker is called an actor. Actors can send messages directly to each other. Messages are sent and processed asynchronously. Actors can be used to implement one or more job processing assembly lines, as described earlier. Here is a diagram illustrating the actor model:
+在Actor模型中每个工作者被称为actor。Actor之间可以直接异步地发送和处理消息。Actor可以被用来实现一个或多个像前文描述的那样的作业处理流水线。下图给出了Actor模型：
 
 ![01-Concurrency-Models#concurrency-models-7.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-7.png)
 
-In the channel model, workers do not communicate directly with each other. Instead they publish their messages (events) on different channels. Other workers can then listen for messages on these channels without the sender knowing who is listening. Here is a diagram illustrating the channel model:
+而在Channel模型中，工作者之间不直接进行通信。相反，它们在不同的通道中发布自己的消息（事件）。其他工作者们可以在这些通道上监听消息，发送者无需知道谁在监听。下图给出了Channel模型：
 
 ![01-Concurrency-Models#concurrency-models-8.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-8.png)
 
-At the time of writing, the channel model seems more flexible to me. A worker does not need to know about what workers will process the job later in the assembly line. It just needs to know what channel to forward the job to (or send the message to etc.). Listeners on channels can subscribe and unsubscribe without affecting the workers writing to the channels. This allows for a somewhat looser coupling between workers.
+在写这篇文章的时候，channel模型对于我来说似乎更加灵活。一个工作者无需知道谁在后面的流水线上处理作业。只需知道作业（或消息等）需要转发给哪个通道。通道上的监听者可以随意订阅或者取消订阅，并不会影响向这个通道发送消息的工作者。这使得工作者之间具有松散的耦合。
 
-## Assembly Line Advantages
+## 流水线模型（串行模型）的优点
 
-The assembly line concurrency model has several advantages compared to the parallel worker model. I will cover the biggest advantages in the following sections.
+与并行工作者模型相比，流水线并发模型具有几个优点，我将在以下部分介绍最大的优势。
 
-### No Shared State
+### 无共享的状态
 
-The fact that workers share no state with other workers means that they can be implemented without having to think about all the concurrency problems that may arise from concurrent access to shared state. This makes it much easier to implement workers. You implement a worker as if it was the only thread performing that work - essentially a singlethreaded implementation.
+工作者之间无需共享状态，意味着实现的时候无需考虑所有因并发访问共享对象而产生的并发性问题。这使得在实现工作者的时候变得非常容易。在实现工作者的时候就好像是单个线程在处理工作-基本上是一个单线程的实现。
 
-### Stateful Workers
+### 有状态的工作者
 
-Since workers know that no other threads modify their data, the workers can be stateful. By stateful I mean that they can keep the data they need to operate in memory, only writing changes back the eventual external storage systems. A stateful worker can therefore often be faster than a stateless worker.
+当工作者知道了没有其他线程可以修改它们的数据，工作者可以变成有状态的。对于有状态，我是指，它们可以在内存中保存它们需要操作的数据，只需在最后将更改写回到外部存储系统。因此，有状态的工作者通常比无状态的工作者具有更高的性能。
 
-### Better Hardware Conformity
+### 更好的硬件一致性
 
-Singlethreaded code has the advantage that it often conforms better with how the underlying hardware works. First of all, you can usually create more optimized data structures and algorithms when you can assume the code is executed in single threaded mode.
+单线程代码的优势在于它通常更符合底层硬件的工作方式。首先，当您可以假设代码以单线程模式执行时，您通常可以创建更优化的数据结构和算法。
 
-Second, singlethreaded stateful workers can cache data in memory as mentioned above. When data is cached in memory there is also a higher probability that this data is also cached in the CPU cache of the CPU executing the thread. This makes accessing cached data even faster.
+其次，单线程有状态工作者可以将数据缓存在内存中，如上所述。当数据缓存在内存中时，该数据也很有可能缓存在执行线程的 CPU 的 CPU 缓存中。这使得访问缓存数据的速度更快。
 
-I refer to it as hardware conformity when code is written in a way that naturally benefits from how the underlying hardware works. Some developers call this mechanical sympathy. I prefer the term hardware conformity because computers have very few mechanical parts, and the word "sympathy" in this context is used as a metaphor for "matching better" which I believe the word "conform" conveys reasonably well. Anyways, this is nitpicking. Use whatever term you prefer.
+当代码以自然受益于底层硬件工作方式的方式编写时， 我将其称为硬件一致性。一些开发者称之为机械共情。我更倾向于硬件整合这个术语，我更喜欢硬件一致性这个词，因为计算机只有很少的机械部件，并且能够隐喻 “更好的匹配” ，相比 “共情” 这个词在上下文中的意思，我觉得 “一致性” 更能传达那个味儿。当然了，这里有点吹毛求疵了，用自己喜欢的术语就行。
 
-### Job Ordering is Possible
+### 可控的任务顺序
 
-It is possible to implement a concurrent system according to the assembly line concurrency model in a way that guarantees job ordering. Job ordering makes it much easier to reason about the state of a system at any given point in time. Furthermore, you could write all incoming jobs to a log. This log could then be used to rebuild the state of the system from scratch in case any part of the system fails. The jobs are written to the log in a certain order, and this order becomes the guaranteed job order. Here is how such a design could look:
+基于流水线并发模型实现的并发系统，在某种程度上是有可能保证作业的顺序的。作业的有序性使得它更容易地推出系统在某个特定时间点的状态。更进一步，你可以将所有到达的作业写入到日志中去。一旦这个系统的某一部分挂掉了，该日志就可以用来重头开始重建系统当时的状态。按照特定的顺序将作业写入日志，并按这个顺序作为有保障的作业顺序。下图展示了一种可能的设计：
 
 ![01-Concurrency-Models#concurrency-models-9.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-models-9.png)
 
-Implementing a guaranteed job order is not necessarily easy, but it is often possible. If you can, it greatly simplifies tasks like backup, restoring data, replicating data etc. as this can all be done via the log file(s).
+实现一个有保障的作业顺序是不容易的，但往往是可行的。如果可以，它将大大简化一些任务，例如备份、数据恢复、数据复制等，这些都可以通过日志文件来完成。
 
-## Assembly Line Disadvantages
+## 流水线模型（串行模型）的缺点
 
-The main disadvantage of the assembly line concurrency model is that the execution of a job is often spread out over multiple workers, and thus over multiple classes in your project. Thus it becomes harder to see exactly what code is being executed for a given job.
+流水线并发模型最大的缺点是作业的执行往往分布到多个工作者上，并因此分布到项目中的多个类上。这样导致在追踪某个作业到底被什么代码执行时变得困难。
 
-It may also be harder to write the code. Worker code is sometimes written as callback handlers. Having code with many nested callback handlers may result in what some developer call callback hell. Callback hell simply means that it gets hard to track what the code is really doing across all the callbacks, as well as making sure that each callback has access to the data it needs.
+同样，这也加大了代码编写的难度。有时会将工作者的代码写成回调处理的形式。若在代码中嵌入过多的回调处理，往往会出现所谓的回调地狱（callback hell）现象。所谓回调地狱，就是意味着在追踪代码在回调过程中到底做了什么，以及确保每个回调只访问它需要的数据的时候，变得非常困难
 
-With the parallel worker concurrency model this tends to be easier. You can open the worker code and read the code executed pretty much from start to finish. Of course parallel worker code may also be spread over many different classes, but the execution sequence is often easier to read from the code.
+使用并行工作者模型可以简化这个问题。你可以打开工作者的代码，从头到尾优美的阅读被执行的代码。当然并行工作者模式的代码也可能同样分布在不同的类中，但往往也能够很容易的从代码中分析执行的顺序。
 
-## Functional Parallelism
+## 函数式并行
 
-Functional parallelism is a third concurrency model which is being talked about a lot these days (2015).
+第三种并发模型是函数式并行模型，这是也最近（2015）讨论的比较多的一种模型。
 
-The basic idea of functional parallelism is that you implement your program using function calls. Functions can be seen as "agents" or "actors" that send messages to each other, just like in the assembly line concurrency model (AKA reactive or event driven systems). When one function calls another, that is similar to sending a message.
+函数式并行的基本思想是采用函数调用实现程序。函数可以看作是”代理人（agents）“或者”actor“，函数之间可以像流水线模型（AKA 反应器或者事件驱动系统）那样互相发送消息。某个函数调用另一个函数，这个过程类似于消息发送。
 
-All parameters passed to the function are copied, so no entity outside the receiving function can manipulate the data. This copying is essential to avoiding race conditions on the shared data. This makes the function execution similar to an atomic operation. Each function call can be executed independently of any other function call.
+函数都是通过拷贝来传递参数的，所以除了接收函数外没有实体可以操作数据。这对于避免共享数据的资源竞争来说是很有必要的。同样也使得函数的执行类似于原子操作。每个函数调用的执行独立于任何其他函数的调用。
 
-When each function call can be executed independently, each function call can be executed on separate CPUs. That means, that an algorithm implemented functionally can be executed in parallel, on multiple CPUs.
+一旦每个函数调用都可以独立的执行，它们就可以分散在不同的CPU上执行了。这也就意味着能够在多处理器上并行的执行使用函数式实现的算法。
 
-With Java 7 we got the java.util.concurrent package contains the ForkAndJoinPool which can help you implement something similar to functional parallelism. With Java 8 we got parallel streams which can help you parallelize the iteration of large collections. Keep in mind that there are developers who are critical of the ForkAndJoinPool (you can find a link to criticism in my ForkAndJoinPool tutorial).
+Java7中的 `java.util.concurrent` 包里包含的ForkAndJoinPool能够帮助我们实现类似于函数式并行的一些东西。而Java8中并行streams能够用来帮助我们并行的迭代大型集合。请记住，有些开发者对ForkAndJoinPool进行了批判（你可以在我的ForkAndJoinPool教程里面看到批评的链接）。
 
-The hard part about functional parallelism is knowing which function calls to parallelize. Coordinating function calls across CPUs comes with an overhead. The unit of work completed by a function needs to be of a certain size to be worth this overhead. If the function calls are very small, attempting to parallelize them may actually be slower than a singlethreaded, single CPU execution.
+函数式并行里面最难的是确定需要并行的那个函数调用。跨CPU协调函数调用需要一定的开销。某个函数完成的工作单元需要达到某个大小以弥补这个开销。如果函数调用作用非常小，将它并行化可能比单线程、单CPU执行还慢。
 
-From my understanding (which is not perfect at all) you can implement an algorithm using an reactive, event driven model and achieve a breakdown of the work which is similar to that achieved by functional parallelism. With an even driven model you just get more control of exactly what and how much to parallelize (in my opinion).
+我个人认为（可能不太正确），你可以使用响应式或者事件驱动模型实现一个算法，像函数式并行那样的方法实现工作的分解。使用事件驱动模型可以更精确的控制如何实现并行化（我的观点）。
 
-Additionally, splitting a task over multiple CPUs with the overhead the coordination of that incurs, only makes sense if that task is currently the only task being executed by the the program. However, if the system is concurrently executing multiple other tasks (like e.g. web servers, database servers and many other systems do), there is no point in trying to parallelize a single task. The other CPUs in the computer are anyways going to be busy working on other tasks, so there is not reason to try to disturb them with a slower, functionally parallel task. You are most likely better off with an assembly line (reactive) concurrency model, because it has less overhead (executes sequentially in singlethreaded mode) and conforms better with how the underlying hardware works.
+此外，将任务拆分给多个CPU时协调造成的开销，仅仅在该任务是程序当前执行的唯一任务时才有意义。但是，如果当前系统正在执行多个其他的任务时（比如web服务器，数据库服务器或者很多其他类似的系统），将单个任务进行并行化是没有意义的。不管怎样计算机中的其他CPU们都在忙于处理其他任务，没有理由用一个慢的、函数式并行的任务去扰乱它们。使用流水线（响应式）并发模型可能会更好一点，因为它开销更小（在单线程模式下顺序执行）同时能更好的与底层硬件一致。
 
-## Which Concurrency Model is Best?
+## 哪种并发模型最好？
 
-So, which concurrency model is better?
+那么，哪种并发模型更好呢？
 
-As is often the case, the answer is that it depends on what your system is supposed to do. If your jobs are naturally parallel, independent and with no shared state necessary, you might be able to implement your system using the parallel worker model.
+通常情况下，这个答案取决于你的系统打算做什么。如果你的作业本身就是并行的、独立的并且没有必要共享状态，你可能会使用并行工作者模型去实现你的系统。
 
-Many jobs are not naturally parallel and independent though. For these kinds of systems I believe the assembly line concurrency model has more advantages than disadvantages, and more advantages than the parallel worker model.
+但是，许多工作并不是天生并行和独立的。对于这类系统，我相信流水线并发模型的优点多于缺点，而且比并行工作模型的优点更多。
 
-You don't even have to code all that assembly line infrastructure yourself. Modern platforms like [Vert.x](http://tutorials.jenkov.com/vert.x/index.html) has implemented a lot of that for you. Personally I will be exploring designs running on top of platforms like Vert.x for my next projects. Java EE just doesn't have the edge anymore, I feel.
+您甚至不必自己编写所有流水线的基础设计。像 [Vert.x](http://tutorials.jenkov.com/vert.x/index.html) 这样的现代平台已经为你实现了很多。就我个人而言，我将为我的下一个项目探索在 Vert.x 等平台上运行的设计。我觉得 Java EE 不太有优势了。
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b%e6%a8%a1%e5%9e%8b/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
