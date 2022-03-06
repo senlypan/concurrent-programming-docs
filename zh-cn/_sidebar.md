@@ -7,6 +7,7 @@
 * Java并发与多线程介绍
 
   * [Java并发与多线程介绍](zh-cn/00-Java-Concurrency-and-Multithreading-Tutorial.md)
+  * [走近Java并发编程](zh-cn/00-java-concurrency-about.md)
 
 * 并发与多线程原理
 
