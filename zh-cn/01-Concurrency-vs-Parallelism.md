@@ -1,80 +1,79 @@
-# Concurrency vs. Parallelism
+# 并发与并行
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/concurrency-vs-parallelism.html  Update: 2022-02-23
+> 原文: http://tutorials.jenkov.com/java-concurrency/concurrency-vs-parallelism.html  最后更新: 2022-02-23
 
-## ⛔抱歉，本文暂无中文翻译，持续更新中
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+术语并发性和并行性通常用于与多线程程序相关的。起初，并发性和并行性似乎指的是相同的概念。但是，并发和并行实际上有不同的含义。在这个并发与并行教程中，我将解释这些概念的含义。
 
-The terms concurrency and parallelism are often used in relation to multithreaded programs. At first it may seem as if concurrency and parallelism may be referring to the same concepts. However, concurrency and parallelism actually have different meanings. In this concurrency vs. parallelism tutorial I will explain what these concepts mean.
+为了清楚起见，在本文中，我讨论在单个应用程序（单个进程）中的并发性和并行性。不在多个应用程序、进程或计算机之间。
 
-Just to be clear, in this text I look at concurrency and parallelism within a single application - a single process. Not among multiple applications, processes or computers.
+## 并发与并行教程视频
 
-## Concurrency vs Parallelism Tutorial Video
-
-If you prefer video, I have a video version of this tutorial here: [Concurrency vs Parallelism Tutorial Video](https://www.youtube.com/watch?v=Y1pgpn2gOSg&list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4&index=9)
+如果您喜欢视频，这里有本教程对应的视频版本: [并发与并行教程视频](https://www.youtube.com/watch?v=Y1pgpn2gOSg&list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4&index=9)
 
 ![01-Concurrency-vs-Parallelism#concurrency-vs-parallelism-video-screenshot.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-vs-parallelism-video-screenshot.png)
 
-## Concurrency
+## 并发
 
-Concurrency means that an application is making progress on more than one task - at the same time or at least seemingly at the same time (concurrently).
+并发是指在一个应用程序中同时存在多个任务在执行，同时刻或者说看起来是同一时刻（并发）。
 
-If the computer only has one CPU the application may not make progress on more than one task at exactly the same time, but more than one task is in progress at a time inside the application. To make progress on more than one task concurrently the CPU switches between the different tasks during execution. This is illustrated in the diagram below:
+如果计算机只有一个CPU，应用程序可能不会在同一时间完成多个任务，但在应用程序内部一次完成多个任务。要同时在多个任务上取得进展，CPU会在执行期间在不同的任务之间切换。如下图所示：
 
 ![01-Concurrency-vs-Parallelism#concurrency-vs-parallelism-1.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-vs-parallelism-1.png)
 
-## Parallel Execution
+## 并行执行
 
-Parallel execution is when a computer has more than one CPU or CPU core, and makes progress on more than one task simultaneously. However, parallel execution is not referring to the same phenomenon as parallelism. I will get back to parallelism later. Parallel execution is illustrated below:
+并行执行是指计算机具有多个 CPU 或 CPU 内核，并同时在多个任务上取得进展。但是，并行执行并不是指与并行性相同的现象 。稍后我将回到并行性。并行执行如下图所示：
 
 ![01-Concurrency-vs-Parallelism#concurrency-vs-parallelism-2.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-vs-parallelism-2.png)
 
-## Parallel Concurrent Execution
+## 并行并发执行
 
-It is possible to have parallel concurrent execution, where threads are distributed among multiple CPUs. Thus, the threads executed on the same CPU are executed concurrently, whereas threads executed on different CPUs are executed in parallel. The diagram below illustrates parallel concurrent execution.
+可以进行并行并发执行，其中线程分布在多个 CPU 中。因此，在同一个 CPU 上执行的线程是并发执行的，而在不同 CPU 上执行的线程是并行执行的。下图说明了并行并发执行。
 
 ![01-Concurrency-vs-Parallelism#concurrency-vs-parallelism-3.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-vs-parallelism-3.png)
 
-## Parallelism
+## 并行性
 
-The term parallelism means that an application splits its tasks up into smaller subtasks which can be processed in parallel, for instance on multiple CPUs at the exact same time. Thus, parallelism does not refer to the same execution model as parallel concurrent execution - even if they may look similar on the surface.
+术语并行性意味着一个应用程序将其任务拆分成更小的子任务，这些子任务可以并行处理，例如在多个CPU上同时处理。因此，并行性并不是指与并行执行相同的执行模型，即使它们表面上看起来很相似。
 
-To achieve true parallelism your application must have more than one thread running - and each thread must run on separate CPUs / CPU cores / graphics card GPU cores or similar.
+为了实现真正的并行性，您的应用程序必须运行多个线程，每个线程必须在单独的 CPU/CPU 内核/显卡 GPU 内核或类似内核上运行。
 
-The diagram below illustrates a bigger task which is being split up into 4 subtasks. These 4 subtasks are being executed by 4 different threads, which run on 2 different CPUs. This means, that parts of these subtasks are executed concurrently (those executed on the same CPU), and parts are executed in parallel (those executed on different CPUs).
+下图显示了一个更大的任务，它被分为4个子任务。这4个子任务由4个不同的线程执行，它们运行在2个不同的CPU上。这意味着，这些子任务的部分是并行执行的（在同一CPU上执行的），而部分是并行执行的（在不同CPU上执行的）。
 
 ![01-Concurrency-vs-Parallelism#concurrency-vs-parallelism-4.png](http://tutorials.jenkov.com/images/java-concurrency/concurrency-vs-parallelism-4.png)
 
-If instead the 4 subtasks were executed by 4 threads running on each their own CPU (4 CPUs in total), then the task execution would have been fully parallel. However, it is not always easy to break a task into exactly as many subtasks as the number of CPUs available. Often, it is easier to break a task into a number of subtasks which fit naturally with the task at hand, and then let the thread scheduler take care of distributing the threads among the available CPUs.
+如果这4个子任务由4个线程在各自的CPU上执行（总共4个CPU），那么任务的执行将是完全并行的。然而，要将一个任务分解成与可用CPU数量一样多的子任务并不总是那么容易。通常，将一个任务分解为多个子任务更容易，这些子任务与手头的任务自然匹配，然后让线程调度器负责在可用CPU之间分配线程。
 
-## Concurrency and Parallelism Combinations
+## 并发性和并行性组合
 
-To recap, concurrency refers to how a single CPU can make progress on multiple tasks seemingly at the same time (AKA concurrently).
+综上所述，并发性指的是多个任务在单个CPU上看似同时取得进展。
 
-Parallelism on the other hand, is related to how an application can parallelize the execution of a single task - typically by splitting the task up into subtasks which can be completed in parallel.
+另一方面，并行性与应用程序如何并行执行单个任务有关，通常是通过将任务拆分为可以并行完成的子任务。
 
-These two execution styles can be combined within the same application. I will cover some of these combinations below.
+这两种执行方式可以在同一个应用程序中组合。我将在下面介绍其中一些组合。
 
-### Concurrent, Not Parallel
+### 并发，非并行
 
-An application can be concurrent, but not parallel. This means that it makes progress on more than one task seemingly at the same time (concurrently), but the application switches between making progress on each of the tasks - until the tasks are completed. There is no true parallel execution of tasks going in parallel threads / CPUs.
+应用程序可以是并发的，但不能是并行的。这意味着它似乎同时（同时）在多个任务上取得进展，但应用程序会在每个任务上取得进展之间切换，直到任务完成。在并行线程/CPU中没有真正的任务并行执行。
 
-### Parallel, Not Concurrent
+### 并行，不并发
 
-An application can also be parallel but not concurrent. This means that the application only works on one task at a time, and this task is broken down into subtasks which can be processed in parallel. However, each task (+ subtask) is completed before the next task is split up and executed in parallel.
+应用程序也可以是并行的，但不能是并发的。这意味着应用程序一次只能处理一个任务，而这个任务被分解成可以并行处理的子任务。但是，每个任务（+子任务）都是在下一个任务被拆分并并行执行之前完成的。
 
-### Neither Concurrent Nor Parallel
+### 既不并发也不并行
 
-Additionally, an application can be neither concurrent nor parallel. This means that it works on only one task at a time, and the task is never broken down into subtasks for parallel execution. This could be the case for small command line applications where it only has a single job which is too small to make sense to parallelize.
+此外，应用程序既不能是并发的，也不能是并行的。这意味着它一次只能处理一个任务，而且任务永远不会分解为并行执行的子任务。小型命令行应用程序可能就是这种情况，因为它只有一个作业，太小了，无法并行化。
 
-### Concurrent and Parallel
+### 并发且并行
 
-Finally, an application can also be both concurrent and parallel in two ways:
+最后，应用程序还可以通过两种方式同时并发和并行：
 
-The first is simple parallel concurrent execution. This is what happens if an application starts up multiple threads which are then executed on multiple CPUs.
+第一种是简单的并行执行。如果应用程序启动多个线程，然后在多个CPU上执行，就会发生这种情况。
 
-The second way is that the application both works on multiple tasks concurrently, and also breaks each task down into subtasks for parallel execution. However, some of the benefits of concurrency and parallelism may be lost in this scenario, as the CPUs in the computer are already kept reasonably busy with either concurrency or parallelism alone. Combining it may lead to only a small performance gain or even performance loss. Make sure you analyze and measure before you adopt a concurrent parallel model blindly.
+第二种方式是应用程序同时处理多个任务，并将每个任务分解为子任务以并行执行。但是，在这种情况下，并发性和并行性的一些好处可能会丢失，因为计算机中的 CPU 已经相当忙于并发性或并行性。结合它可能只会导致很小的性能提升甚至性能损失。确保在盲目采用并发并行模型之前进行分析和测量。
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
