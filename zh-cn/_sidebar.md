@@ -67,5 +67,6 @@
 ---
 
 <a href="http://jvm.panshenlian.com/#/zh-cn/" target="_blank" rel="noopener" title="Java虚拟机学习手册"><img src="/_media/code.svg">Java虚拟机学习手册</a>
+<a href="http://spring.panshenlian.com/" target="_blank" rel="noopener" title="Spring框架学习手册"><img src="/_media/code.svg">Spring框架学习手册</a>
 <a href="http://www.panshenlian.com/" target="_blank" rel="noopener" title="潘深练的个人网站"><img src="/_media/panshenlian.png">潘深练的个人网站</a>
 <a href="https://github.com/senlypan/concurrent-programming-docs" target="_blank" rel="noopener" title="Github"><img src="/_media/github.svg">Github</a>
