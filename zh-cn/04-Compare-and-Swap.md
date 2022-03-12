@@ -1,17 +1,17 @@
-# 关于CAS
+# CAS
 
 > 作者: 雅各布·詹科夫
 >
 > 原文: http://tutorials.jenkov.com/java-concurrency/compare-and-swap.html  最后更新: 2022-02-24
 
-比较并交换是设计并发算法时使用的一种技术。基本上，比较并交换是将变量的值与期望值进行比较，如果值相等则将变量的值交换为新值。比较并交换可能听起来有点复杂，但一旦你理解它实际上相当简单，所以让我进一步详细说明这个主题。
+`CAS` (compare and swap) 是并发算法设计时使用的一种技术。基本上，`CAS`是将变量的值与期望值进行比较，如果值相等，则将变量的值交换设置为新值。`CAS`可能听起来有点复杂，但一旦你理解它实际上相当简单，所以让我进一步详细说明这个主题。
 
-顺便说一句，比较并交换有时是 `CAS` 的缩写，所以如果你看到一些关于并发的文章或视频提到 `CAS`，它很有可能是指比较并交换操作。
+顺便说一句，compare and swap 有时是 `CAS` 的缩写，所以如果你看到一些关于并发的文章或视频提到 `CAS`，它很有可能是指 compare and swap（比较并交换）操作。
 
-## 比较和交换教程视频
+## CAS教程视频
 
-如果您喜欢视频，我在这里有这个比较并交换的视频教程版本：
-[比较并交换视频教程](https://www.youtube.com/watch?v=ufWVK7CHOAk&list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4&index=18)
+如果您喜欢视频，我在这里有这个`CAS`的视频教程版本：
+[CAS视频教程](https://www.youtube.com/watch?v=ufWVK7CHOAk&list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4&index=18)
 
 ![04-Compare-and-Swap.md#compare-and-swap-video-screenshot.png](http://tutorials.jenkov.com/images/java-concurrency/compare-and-swap-video-screenshot.png)
 
@@ -40,7 +40,7 @@ public class ProblematicLock {
 }
 ```
 
-此代码不是多线程锁的 `100%` 正确实现。这就是我给它命名的原因 `ProblematicLock` (问题锁) 。然而，我创建了这个错误的实现来说明如何通过比较并交换功能来解决它​​的问题。
+此代码不是多线程锁的 `100%` 正确实现。这就是我给它命名的原因 `ProblematicLock` (问题锁) 。然而，我创建了这个错误的实现来说明如何通过`CAS`功能来解决它​​的问题。
 
 该`lock()`方法首先检查成员变量是否`locked`等于`false`。这是在`while-loop`内部完成的。如果`locked`变量是`false`，则该`lock()`方法离开`while`循环并设置`locked`为`true`。换句话说，该 `lock()`方法首先检查变量的值`locked`，然后根据该检查进行操作。先检查，再执行。
 
@@ -48,21 +48,21 @@ public class ProblematicLock {
 
 如果线程 A 检查`locked`的值为 `false`（预期值），它将退出 `while-loop` 循环执行后续的逻辑。如果此时有个线程B在线程A将`locked`值设置为 `true` 之前也检查了 `locked` 的值，那么线程B也将退出 `while-loop` 循环执行后续的逻辑。这是一个典型的资源竞争问题。
 
-## 先检测后执行（Check Then Act）必须是原子性的
+## 先检查后执行（Check Then Act）必须是原子性的
 
-To work properly in a multithreaded application (to avoid race conditions), check then act operations must be atomic. By atomic is meant that both the check and act actions are executed as an atomic (non-dividable) block of code. Any thread that starts executing the block will finish executing the block without interference from other threads. No other threads can execute the atomic block at the same time.
+为了在多线程应用程序中正常工作（以避免资源竞争），先检查后执行（`Check Then Act`）必须是原子性的。原子性的意思是检查和执行动作都作为原子（不可分割的）代码块执行。任何开始执行该块的线程都将完成该块的执行，而不受其他线程的干扰。不允许其他线程在同一时刻执行相同原子块。
 
-A simple way to make a block of Java code atomic is to mark it using the synchronized Java keyword. See my Java synchronized tutorial for more details. Here is the ProblematicLock from earlier with the lock() method turned into an atomic block of code using the synchronized keyword:
+使`Java`代码块具有原子性的一种简单方法是使用`Java`的`synchronized`关键字对其进行标记。可以参阅[ 关于synchronized](../zh-cn/02-Java-Synchronized-Blocks.md) 的内容。这是`ProblematicLock`之前使用`synchronized`关键字将`lock()`方法转换为原子代码块的方法：
 
 ```java
-public class ProblematicLock {
+public class MyLock {
 
     private volatile boolean locked = false;
 
     public synchronized void lock() {
 
         while(this.locked) {
-            // busy wait - until this.locked == false
+            // 忙等待 - 直到 this.locked == false
         }
 
         this.locked = true;
@@ -75,33 +75,33 @@ public class ProblematicLock {
 }
 ```
 
-Now the `lock()` method is synchronized so only one thread can executed it at a time on the same MyLock instance. The `lock()` method is effectively atomic.
+现在方法`lock()`已申明同步，因此同一实例的`lock()`方法在同一时刻只允许被一个线程访问执行。相当于 `lock()` 方法是原子性的。
 
-## Blocking Threads is Expensive
+## 阻塞线程的代价很大
 
-When two threads try to enter a synchronized block in Java at the same time, one of the threads will be blocked, and the other thread will allowed to enter the synchronized block. When the thread that entered the synchronized block exits the block again, a waiting thread will be allowed to enter the block.
+当两个线程试图同时进入`Java`中的一个同步块时，其中一个线程将被阻塞，而另一个线程将被允许进入同步块。当进入同步块的线程再次退出该块时，等待中的线程才会被允许进入该块。
 
-Entering a synchronized block is not that expensive - if the thread is allowed access. But if the thread is blocked because another thread is already executing inside the synchronized block - the blocking of the thread is expensive.
+如果线程被允许访问执行，那么进入一段同步代码块的代价并不大。但是如果因为已有一个线程在同步块中执行导致另一个线程被迫等阻塞，那么这个阻塞线程的代价就很大。
 
-Additionally, you do not have any guarantee about exactly when a blocked thread is unblocked when the synchronized block is free again. This is typically up to the OS or execution platform to coordinate the unblocking of blocked threads. Of course it will not take seconds or minutes before a blocked thread is unblocked and allowed to enter, but some amount of time can be wasted for the blocked thread where it could have accessed the shared data structure. This is illustrated here:
+此外，当同步块再次空闲时，**您无法准确地确定何时能解除阻塞的线程**。这通常取决于`操作系统`或`执行平台`来 **协调** 阻塞线程的 **阻塞解除**。当然，在阻塞线程被解除阻塞并允许进入之前不会花费几秒钟或几分钟，但是可能会浪费一些时间用于阻塞线程，因为它本来可以访问共享数据结构的。这在此处进行了说明：
 
 ![04-Compare-and-Swap.md#compare-and-swap-1.png](http://tutorials.jenkov.com/images/java-concurrency/compare-and-swap-1.png)
 
-## Hardware Provided Atomic Compare And Swap Operations
+## 硬件提供的原子性CAS操作
 
-Modern CPUs have built-in support for atomic compare and swap operations. Compare and swap operations can be used in some situations as a replacement for synchronized blocks or other blocking data structures. The CPU guarantees that only one thread can execute a compare-and-swap operation at a time - even across CPU cores. This tutorial contains examples later of how that looks in code.
+现代 `CPU` 内置了对`CAS`的原子性操作的支持。在某些情况下，可以使用`CAS`操作来替代同步块或其他阻塞数据结构。`CPU` 保证一次只有一个线程可以执行`CAS`操作，即使跨 `CPU` 内核也是如此。稍后在代码中有示例。
 
-When using a hardware / CPU provided compare-and-swap functionality instead of an OS or execution platform provided synchronization, lock, mutex etc. , the OS or execution platform does not need to handle the blocking and unblocking of threads. This results in shorter amounts of time where a thread waits to execute a compare-and-swap operation, and thus results in less congestions and higher throughput. This is illustrated below:
+当使用硬件或 `CPU` 提供的`CAS`功能而不是操作系统或执行平台提供的 `synchronized`、`lock`、`mutex`（互斥锁） 等时，操作系统或执行平台不需要处理线程的阻塞和解除阻塞。这使得使用`CAS`的线程等待执行操作的时间更短，并且拥有更少的拥塞和更高的吞吐量。如下图所示：
 
 ![04-Compare-and-Swap.md#compare-and-swap-2.png](http://tutorials.jenkov.com/images/java-concurrency/compare-and-swap-2.png)
 
-As you can see, the thread trying to enter the shared data structure is never fully blocked. It keeps trying to execute the compare-and-swap operation until it succeeds, and is allowed to access the shared data structure. This way the delay before the thread can enter the shared data structure is minimized.
+如您所见，试图进入共享数据结构的线程永远不会被完全阻塞。它不断尝试执行`CAS`操作，直到成功，并被允许访问共享数据结构。这样线程可以进入共享数据结构之前的延迟被最小化。
 
-Of course, if the thread is waiting in the repeated execution of compare-and-swap for a long time, it may waste a lot of CPU cycles which could instead have been used on other tasks (other threads). In many cases that is not the case, though. It depends on how long the shared data structure remains in use by another thread. In practice, shared data structures are not in use for very long, so the above situation should not occur that often. But again - it depends on the concrete situation, code, data structure, number of threads trying to access the data structure, load on the system etc. In contrast, a blocked thread does not use the CPU at all.
+当然，如果线程在重复执行`CAS`的过程中等待很长时间，可能会浪费大量的`CPU`周期，而这些`CPU`周期本来可以用在其他任务（其他线程）上。但在许多情况下，情况并非如此。这取决于共享数据结构被另一个线程使用多长时间。实际上，共享数据结构的使用时间不长，因此上述情况不应该经常发生。但同样这取决于具体情况、代码、数据结构、尝试访问数据结构的线程数、系统负载等。相反，阻塞的线程根本不使用`CPU`。
 
-## Compare and Swap in Java
+## Java中的CAS
 
-Since Java 5 you have access to compare and swap functions at the CPU level via some of the new atomic classes in the java.util.concurrent.atomic package. These classes are:
+从 `Java 5` 开始，您可以通过`java.util.concurrent.atomic`包中的一些新的原子类访问 `CPU` 级别的`CAS`方法。这些类有：
 
 - [AtomicBoolean](http://tutorials.jenkov.com/java-util-concurrent/atomicboolean.html)
 - [AtomicInteger](http://tutorials.jenkov.com/java-util-concurrent/atomicinteger.html)
@@ -112,13 +112,15 @@ Since Java 5 you have access to compare and swap functions at the CPU level via 
 - [AtomicLongArray](http://tutorials.jenkov.com/java-util-concurrent/atomiclongarray.html)
 - [AtomicReferenceArray](http://tutorials.jenkov.com/java-util-concurrent/atomicreferencearray.html)
 
-The advantage of using the compare and swap features that comes with Java 5+ rather than implementing your own is that the compare and swap features built into Java 5+ lets you utilize the underlying compare and swap features of the CPU your application is running on. This makes your compare and swap code faster.
+使用 `Java 5+` 附带的 `CAS` 功能而不是自己实现的优势在于，`Java 5+` 中内置的 `CAS` 功能允许您的应用程序利用 `CPU` 的底层能力执行`CAS`操作。这使您的`CAS`实现代码更快。
 
-## Compare And Swap as Guard
+## CAS的保障性
 
-The compare and swap functionality can be used to guard a critical section - thus preventing multiple threads from executing the critical section simultaneously.
+`CAS`功能可用于保护临界区（`Critical Section`），从而防止多个线程同时执行临界区。
 
-Below is an example showing how to implement the lock() method shown earlier using the AtomicBoolean class using compare and swap functionality that thus works as a guard (only one thread at a time can exit the lock() method).
+?> **critical section** 是每个线程中访问临界资源的那段代码，不论是硬件临界资源，还是软件临界资源，多个线程必须互斥地对它进行访问。每个线程中访问临界资源的那段代码称为临界区（`Critical Section`）。每个线程中访问临界资源的那段程序称为临界区（`Critical Section`）（临界资源是一次仅允许一个线程使用的**共享资源**）。每次只准许一个线程进入临界区，进入后不允许其他线程进入。
+
+下面的一个示例，展示了如何使用`AtomicBoolean`类的`CAS`功能来实现前面显示的`lock()`方法并因此起到保障作用（一次只有一个线程可以退出该`lock()`方法）。
 
 ```java
 public class CompareAndSwapLock {
@@ -137,17 +139,17 @@ public class CompareAndSwapLock {
 }
 ```
 
-Notice how the locked variable is no longer a boolean but an AtomicBoolean. This class has a compareAndSet() function which will compare the value of the AtomicBoolean instance to an expected value, and if has the expected value, it swaps the value with a new value. The compareAndSet() method returns true if the value was swapped, and false if not.
+注意这个`locked`变量不再是一个布尔类型而是`AtomicBoolean`类型，此类有一个`compareAndSet()`方法，会把实例的值（变量locked）与第一个参数（`false`）进行比较，如果比较结果相同（即locked的值等于第一个参数false），那么会将实例的值 `locked` 与期望值`true`交换（即把locked变量设置为true，表示锁住了）。如果交换成功则`compareAndSet()`方法会返回 `true`，如果没有交换成功则返回 `false`。
 
-In the example above the compareAndSet() method call compares the value of locked to false and if it is false it sets the new value of the AtomicBoolean to true.
+在上面的例子中，`compareAndSet()`方法调用比较了`locked`变量值与`false`值，如果`locked`变量值的结果值就是`false`，那么就是设置`locked`值为`true`。
 
-Since only one thread can be allowed to execute the compareAndSet() method at a time, only one thread will be able to see the AtomicBoolean with the value false, and thus swap it to true. Thus, only one thread at a time will be able to exit the while-loop - one thread for each time the CompareAndSwapLock is unlocked via the unlock() method's call to locked.set(false) .
+由于一次只能允许一个线程执行该`compareAndSet()`方法，因此只有一个线程能够看到AtomicBoolean实例值为 `false`，从而将其交换为`true`。因此，每次只有一个线程能够退出`while-loop`（while循环），通过调用 `unlock()` 方法设置 `locked` 为 `false` 使得每次只有一个线程的 `CompareAndSwapLock` 是解锁状态的。 
 
-## Compare and Swap as Optimistic Locking Mechanism
+## CAS实现乐观锁
 
-It is also possible to use compare and swap functionality as an optimistic locking mechanism. An optimistic locking mechanism allows more than one thread to enter a critical section at a time, but only allows one of the threads to commit its work at the end of the critical section.
+也可以使用`CAS`功能作为乐观锁机制。乐观锁机制允许多个线程同时进入临界区，但只允许其中一个线程在临界区结束时提交其工作。
 
-Below is an example of a concurrent counter class that uses an optimistic locking strategy:
+下面是一个使用乐观锁策略的并发计数器类示例：
 
 ```java
 public class OptimisticLockCounter{
@@ -172,9 +174,9 @@ public class OptimisticLockCounter{
 }
 ```
 
-Notice how the `inc()` method obtains the existing count value from the count variable, an AtomicLong instance. Then a new value is calculated based on the old value. Finally, the `inc()` method attempts to set the new value in the AtomicLong instance via a call to `compareAndSet()`.
+请注意 `inc()` 方法是如何从 `AtomicLong`实例变量`count`中获取现有计数值的。然后根据旧值计算出新值。最后，`inc()` 方法尝试通过调用`AtomicLong`实例的`compareAndSet()`方法来设置新值。
 
-If the AtomicLong still has the same value as when it was last obtained, the `compareAndSet()` will succeed. But if another thread has incremented the value in the AtomicLong in the meantime, the `compareAndSet()` call will fail, because the expected value (`value`) is no longer the value stored inside the `AtomicLong`. In that case, the `inc()` method will take another iteration in the while-loop and try to increment the `AtomicLong` value again.
+如果`AtomicLong`实例值`count`在比较时仍然拥有与上次获取时（`long value = this.count.get()`）的值相同，那么`compareAndSet()`会执行成功。但是假如有另一个线程在同一时刻已经调用增加了`AtomicLong`实例值（指有一个线程在之前已经调用成功`compareAndSet()`方法了，一般认为是**资源竞争**），则`compareAndSet()`调用将失败，因为预期值`value`不再等于存储在中的值`AtomicLong`（原值已经被前一个线程更改过）。在这种情况下，`inc()`方法将在 `while-loop`（while循环）中进行另外一次迭代并尝试再次增加`AtomicLong`值。
 
 （本篇完）
 

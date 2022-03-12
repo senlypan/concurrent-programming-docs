@@ -55,7 +55,7 @@ To work properly in a multithreaded application (to avoid race conditions), chec
 A simple way to make a block of Java code atomic is to mark it using the synchronized Java keyword. See my Java synchronized tutorial for more details. Here is the ProblematicLock from earlier with the lock() method turned into an atomic block of code using the synchronized keyword:
 
 ```java
-public class ProblematicLock {
+public class MyLock {
 
     private volatile boolean locked = false;
 

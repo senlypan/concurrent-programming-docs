@@ -1,4 +1,4 @@
-# Java Synchronized Blocks
+# 关于Synchronized
 
 > Author: Jakob Jenkov
 >
