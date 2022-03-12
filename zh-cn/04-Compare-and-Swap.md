@@ -1,26 +1,23 @@
-# Compare and Swap
+# 关于CAS
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/compare-and-swap.html  Update: 2022-02-24
+> 原文: http://tutorials.jenkov.com/java-concurrency/compare-and-swap.html  最后更新: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译，持续更新中
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+比较并交换是设计并发算法时使用的一种技术。基本上，比较并交换是将变量的值与期望值进行比较，如果值相等则将变量的值交换为新值。比较并交换可能听起来有点复杂，但一旦你理解它实际上相当简单，所以让我进一步详细说明这个主题。
 
-Compare and swap is a technique used when designing concurrent algorithms. Basically, compare and swap compares the value of a variable with an expected value, and if the values are equal then swaps the value of the variable for a new value. Compare and swap may sound a bit complicated but it is actually reasonably simple once you understand it, so let me elaborate a bit further on the topic.
+顺便说一句，比较并交换有时是 `CAS` 的缩写，所以如果你看到一些关于并发的文章或视频提到 `CAS`，它很有可能是指比较并交换操作。
 
-By the way, compare and swap is sometimes abbreviated CAS, so if you see some articles or videos about concurrency mention CAS, there is a good chance that it refers to compare and swap operations.
+## 比较和交换教程视频
 
-## Compare and Swap Tutorial Video
-
-If you prefer video, I have a video version of this compare and swap tutorial here:
-[Compare and Swap Tutorial Video](https://www.youtube.com/watch?v=ufWVK7CHOAk&list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4&index=18)
+如果您喜欢视频，我在这里有这个比较并交换的视频教程版本：
+[比较并交换视频教程](https://www.youtube.com/watch?v=ufWVK7CHOAk&list=PLL8woMHwr36EDxjUoCzboZjedsnhLP1j4&index=18)
 
 ![04-Compare-and-Swap.md#compare-and-swap-video-screenshot.png](http://tutorials.jenkov.com/images/java-concurrency/compare-and-swap-video-screenshot.png)
 
-## Compare and Swap for Check Then Act Cases
+## CAS的使用场景（Check Then Act）
 
-A commonly occurring pattern in concurrent algorithms is the check then act pattern. The check then act pattern occurs when the code first checks the value of a variable and then acts based on that value. Here is a simple example:
+并发算法中常见的模式是先检查后执行（`check then act`）模式。当代码首先检查变量的值然后根据该值进行操作时，就会出现先检查后执行（`check then act`）模式。这是一个简单的例子：
 
 ```java
 public class ProblematicLock {
@@ -30,7 +27,7 @@ public class ProblematicLock {
     public void lock() {
 
         while(this.locked) {
-            // busy wait - until this.locked == false
+            // 忙等待 - 直到 this.locked == false
         }
 
         this.locked = true;
@@ -43,15 +40,15 @@ public class ProblematicLock {
 }
 ```
 
-This code is not a 100% correct implementation of a multi-threaded lock. That is why I have named it `ProblematicLock`. However, I have created this faulty implementation to illustrate how its problems can be fixed via compare and swap functionality.
+此代码不是多线程锁的 `100%` 正确实现。这就是我给它命名的原因 `ProblematicLock` (问题锁) 。然而，我创建了这个错误的实现来说明如何通过比较并交换功能来解决它​​的问题。
 
-The `lock()` method first checks if the locked member variable is equal to false. That is done inside while-loop. If the locked variable is false, the `lock()` method leaves the while-loop and sets locked to true. In other words, the `lock()` method first checks the value of the locked variable, and then acts based on that check. Check, then act.
+该`lock()`方法首先检查成员变量是否`locked`等于`false`。这是在`while-loop`内部完成的。如果`locked`变量是`false`，则该`lock()`方法离开`while`循环并设置`locked`为`true`。换句话说，该 `lock()`方法首先检查变量的值`locked`，然后根据该检查进行操作。先检查，再执行。
 
-If multiple threads had access to the same `ProblematicLock` instance, the above `lock()` method would not be guaranteed to work. For example:
+如果多个线程几乎同时刻访问同一个 `ProblematicLock` 实例，那以上的 `lock()` 方法将会有一些问题，例如：
 
-If thread A checks the value of `locked` and sees that it is false (expected value), it will exit the while-loop to act upon that check. If thread B also checks the value of locked before thread A sets the value of `locked` to `true`, then thread B will also exit the while-loop to act upon that check. This is a classical race condition.
+如果线程 A 检查`locked`的值为 `false`（预期值），它将退出 `while-loop` 循环执行后续的逻辑。如果此时有个线程B在线程A将`locked`值设置为 `true` 之前也检查了 `locked` 的值，那么线程B也将退出 `while-loop` 循环执行后续的逻辑。这是一个典型的资源竞争问题。
 
-## Check Then Act - Must Be Atomic
+## 先检测后执行（Check Then Act）必须是原子性的
 
 To work properly in a multithreaded application (to avoid race conditions), check then act operations must be atomic. By atomic is meant that both the check and act actions are executed as an atomic (non-dividable) block of code. Any thread that starts executing the block will finish executing the block without interference from other threads. No other threads can execute the atomic block at the same time.
 
@@ -179,4 +176,6 @@ Notice how the `inc()` method obtains the existing count value from the count va
 
 If the AtomicLong still has the same value as when it was last obtained, the `compareAndSet()` will succeed. But if another thread has incremented the value in the AtomicLong in the meantime, the `compareAndSet()` call will fail, because the expected value (`value`) is no longer the value stored inside the `AtomicLong`. In that case, the `inc()` method will take another iteration in the while-loop and try to increment the `AtomicLong` value again.
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
