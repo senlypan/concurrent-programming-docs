@@ -2,7 +2,7 @@
 
 ![icon](http://concurrent-programming.panshenlian.com/_media/icon200.png)
 
-> 一本聚合全球优秀Java并发编程内容的共创文档。
+> 一本聚合优质Java并发编程内容的共创文档。
 
 # 概述
 
