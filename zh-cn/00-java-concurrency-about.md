@@ -1,8 +1,8 @@
-# 走近Java并发编程
+# 一文读懂Java并发编程
 
 > 作者: 潘深练
 >
-> 更新: 2022-03-06
+> 更新: 2022-03-19
 
 
 ## 前言
@@ -137,7 +137,7 @@ public ThreadPoolExecutor (
 
 线程独立工作内存缓存导致的可见性问题。
 
-> 在多线程并发编程中 `synchronized` 和 `volatile` 都扮演着重要的角色， `volatile` 是轻量级的 `synchronized` ，它在多处理器开发中保证了共享变量的 “可见性”。
+在多线程并发编程中 `synchronized` 和 `volatile` 都扮演着重要的角色， `volatile` 是轻量级的 `synchronized` ，它在多处理器开发中保证了共享变量的 “可见性”。
 
 **有 `volatile` 变量修饰的共享变量**，进行写操作的时候回多出 lock# 汇编代码。
 通过查 `IA-32` 架构软件开发者手册可知，Lock 前缀的指令在多核处理器下会引发2件事情：
@@ -180,7 +180,7 @@ A: 可在部分处理器中追加64字节能够提高并发编程效率！
 
 不可中断、可重入、非公平、可以被锁粗化、锁消除（作用域不会被其他线程操作）优化
 
-> 锁粗化
+> 锁粗化（锁升级）
 
 - 无锁（锁消除）
 - 偏向锁
@@ -193,13 +193,33 @@ A: 可在部分处理器中追加64字节能够提高并发编程效率！
 
 > volatile 关键字通过 “内存屏障” 来防止指令被重排序。
 
-- 为了实现 volatile 的内存语义，编译器在生成字节码时，会在指令序列中插入内存屏障来禁止特定类型的处理器重排序。
+为了实现 volatile 的内存语义，编译器在生成字节码时，会在指令序列中插入内存屏障来禁止特定类型的处理器重排序。
 - 在每个 volatile 写操作的前面插入一个 StoreStore 屏障。
 - 在每个 volatile 写操作的后面插入一个 StoreLoad 屏障。
 - 在每个 volatile 读操作的后面插入一个 LoadLoad 屏障。
 - 在每个 volatile 读操作的后面插入一个 LoadStore 屏障。
 
 > 解决可见性和有序性
+
+关于 volatile 对线程的安全性说明：
+
+- **可见性**。 对一个 volatile 变量的读，总是能看到（任意线程）对这个 volatile 变量最后的写入。
+- **有序性**。很简单一点就是 volatile 通过内存屏障，规避了编译器和处理器某些不正确的重排序。
+- ~~原子性~~。对任意单个 volatile 变量的读/写具有原子性，但类似于 volatile++ 这种复合操作不具有原子性。
+    - 例如 volatile++ 在实际内存执行中被拆分成4步：
+        - 1. volatile 读取值到 local
+        - 2. 增加 volatile 变量的值
+        - 3. 把 local 值写回
+        - 4. 插入内存屏障
+    - 所以在多线程并发的情况下，不能保证以上4步是具备原子操作的，中间可能会被其他线程插入污染。
+    - 由于 volatile 仅仅保证对单个 volatile 变量的读/写具有原子性，而锁的互斥执行特性则可以确保对整个临界区代码的执行具有原子性。在**功能**上，锁比 volatile 更加强大；在**可伸缩性**和**执行性能**上，volatile 则更有优势。假如真希望在程序中用 volatile 代替锁，请一定谨慎使用。
+
+**重排序**，指的是编译器（编译重排序）和处理器（指令并行重排序和内存重排序）为了优化程序性能而对指令序列进行重新排序的一种手段。
+
+> 锁释放/获取的内存语义与 volatile 写/读的内存语义相同
+
+1. 锁释放与 volatile 写有相同的内存语义：即JMM会把改线程对应的本地内存中的共享变量**刷新到主内存**中。
+2. 锁获取与 volatile 读有相同的内存语义：即JMM会把改线程对应的本地内存**置为无效**。
 
 ### 3、LockSupport
 
@@ -222,6 +242,19 @@ A: 可在部分处理器中追加64字节能够提高并发编程效率！
 > 并行
 > 合理数据结构
 
+## 待梳理问题：
+
+1. 由ReentrantLock引出的公平锁与非公平锁问题
+2. 脑图梳理，结合`p55`与`JUC脑图`统一梳理。（基于**并发机制底层实现原理**与**Java内存模型(可见性)**），锁、synchronized、volatile、final..（针对所有这些域的重排序规则和可见性问题，统一梳理）
+
+
+## 参考
+
+- [《JSR-133 Java Memory Model and Thread Specification 1.0 Proposed Final Draft》](https://download.oracle.com/otndocs/jcp/memory_model-1.0-pfd-spec-oth-JSpec/)
+    - Java内存模型经典JSR
+
+- [《Time, Clocks, and the Ordering of Events in a Distributed System》](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) 
+    - Leslie Lamport 的论文，最早使用 happens-before 来定义分布式系统中事件之间的偏序关系（partial ordering）。
 
 
 （本篇完）

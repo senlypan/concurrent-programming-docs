@@ -7,7 +7,7 @@
 * 二、Java并发与多线程介绍
 
   * [Java并发与多线程介绍](zh-cn/00-Java-Concurrency-and-Multithreading-Tutorial.md)
-  * [走近Java并发编程](zh-cn/00-java-concurrency-about.md)
+  * [一文读懂Java并发编程](zh-cn/00-java-concurrency-about.md)
 
 * 三、并发与多线程原理
 
@@ -37,7 +37,7 @@
   * [死锁](zh-cn/03-Deadlock.md)
   * [避免死锁](zh-cn/03-Deadlock-Prevention.md)
   * [饥饿和公平](zh-cn/03-Starvation-and-Fairness.md)
-  * [嵌套管程锁死](zh-cn/03-Nested-Monitor-Lockout.md)
+  * [嵌套监视器锁死](zh-cn/03-Nested-Monitor-Lockout.md)
   * [Slipped Conditions](zh-cn/03-Slipped-Conditions.md)
   * [伪共享](zh-cn/03-False-Sharing.md)
   * [线程状态拥堵](zh-cn/03-Thread-Congestion.md)

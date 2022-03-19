@@ -40,4 +40,8 @@ https://lmax-exchange.github.io/disruptor/
 
 The LMAX Disrupter concurrent data structure (a single reader, single writer queue-like structure with high concurrency).
 
+http://gee.cs.oswego.edu/
+
+Doug Lea's Home Page
+
 The End.
