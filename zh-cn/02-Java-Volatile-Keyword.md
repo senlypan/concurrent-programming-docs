@@ -1,34 +1,31 @@
 # 关于Volatile
 
-> Author: Jakob Jenkov
+> 作者: 雅各布·詹科夫
 >
-> Link: http://tutorials.jenkov.com/java-concurrency/volatile.html  Update: 2022-02-24
+> 原文: http://tutorials.jenkov.com/java-concurrency/volatile.html  最后更新: 2022-02-24
 
-## ⛔抱歉，本文暂无中文翻译，持续更新中
-?> ❤️ 您也可以参与翻译，快来提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿参与吧~
+Java的`volatile`关键字用于将Java变量标记为“存储在主内存中”。更准确地说，每次对`volatile`变量的读取都将从计算机主内存中读取，而不是从CPU缓存中读取，并且每次对`volatile`变量的写入都将写入主内存，而不仅仅写在CPU缓存。
 
-The Java `volatile` keyword is used to mark a Java variable as "being stored in main memory". More precisely that means, that every read of a volatile variable will be read from the computer's main memory, and not from the CPU cache, and that every write to a volatile variable will be written to main memory, and not just to the CPU cache.
+事实上，自从 Java5 之后，`volatile` 关键字就不仅仅被用来保证 `volatile` 变量读写主内存。我将在以下内容解释这一点。
 
-Actually, since Java 5 the `volatile` keyword guarantees more than just that volatile variables are written to and read from main memory. I will explain that in the following sections.
+## Java volatile 教程视频
 
-## Java volatile Tutorial Video
-
-If you prefer video, I have a video version of this Java volatile tutorial here:
-[Java volatile Tutorial](https://www.youtube.com/watch?v=nhYIEqt-jvY)
+如果你喜欢视频，我在这里有这个 `Java volatile` 教程的视频版本:
+[Java volatile 教程视频](https://www.youtube.com/watch?v=nhYIEqt-jvY)
 
 ![02-Java-Volatile-Keyword.md#java-volatile-video-screenshot.jpg](http://tutorials.jenkov.com/images/java-concurrency/java-volatile-video-screenshot.jpg)
 
-## Variable Visibility Problems
+## 变量可见性问题
 
-The Java volatile keyword guarantees visibility of changes to variables across threads. This may sound a bit abstract, so let me elaborate.
+Java的`volatile`关键字在多线程处理中保证了共享变量的“可见性”。这听起来可能有点抽象，所以让我详细说明。
 
-In a multithreaded application where the threads operate on non-volatile variables, each thread may copy variables from main memory into a CPU cache while working on them, for performance reasons. If your computer contains more than one CPU, each thread may run on a different CPU. That means, that each thread may copy the variables into the CPU cache of different CPUs. This is illustrated here:
+在多线程应用程序中，如果多个线程对同一个无声明`volatile`关键词的变量进行操作，出于性能原因，每个线程可以在处理变量时讲变量从主内存复制到CPU缓存中。如果你的计算机拥有多CPU，则每个线程就可能在不同的CPU上运行。这就意味着，每个线程都可以将变量复制在不同CPU的CPU缓存上。这在此处进行了说明：
 
 ![02-Java-Volatile-Keyword.md#java-volatile-1.png](http://tutorials.jenkov.com/images/java-concurrency/java-volatile-1.png)
 
-With non-volatile variables there are no guarantees about when the Java Virtual Machine (JVM) reads data from main memory into CPU caches, or writes data from CPU caches to main memory. This can cause several problems which I will explain in the following sections.
+对于无声明`volatile`关键词的变量而言，无法保证Java虚拟机（JVM）何时将数据从主内存读取到CPU缓存，或者将数据从CPU缓存写入主内存。这就可能会导致几个问题，我将在以下部分内容解释这些问题。
 
-Imagine a situation in which two or more threads have access to a shared object which contains a counter variable declared like this:
+想象一个场景，多个线程访问一个共享对象，该对象包含一个申明如下的计数器（counter）变量：
 
 ```java
 public class SharedObject {
@@ -38,17 +35,19 @@ public class SharedObject {
 }
 ```
 
-Imagine too, that only Thread 1 increments the counter variable, but both Thread 1 and Thread 2 may read the counter variable from time to time.
+再想象以下，仅有线程1会增加计数器（counter）变量的值，不过线程1和线程2会不时的读取这个计数器变量。
 
-If the counter variable is not declared volatile there is no guarantee about when the value of the counter variable is written from the CPU cache back to main memory. This means, that the counter variable value in the CPU cache may not be the same as in main memory. This situation is illustrated here:
+如果计数器（counter）变量没有申明`volatile`关键词，则无法保证计数器变量的值何时从CPU缓存写回主内存。这就意味着，每个CPU缓存上的计数器变量值和主内存中的变量值可能不一致。这种情况如下所示：
 
 ![02-Java-Volatile-Keyword.md#java-volatile-2.png](http://tutorials.jenkov.com/images/java-concurrency/java-volatile-2.png)
 
-The problem with threads not seeing the latest value of a variable because it has not yet been written back to main memory by another thread, is called a "visibility" problem. The updates of one thread are not visible to other threads.
+一个线程的写操作还没有写回主内存，其他线程（每个线程自己有本地缓存，即CPU缓存）看不到变量的最新值，这就是“可见性”问题。一个线程的更新对其他相差是不可见的。
 
-## The Java volatile Visibility Guarantee
+## Java volatile 可见性保证
 
-The Java `volatile` keyword is intended to address variable visibility problems. By declaring the `counter` variable volatile all writes to the counter variable will be written back to main memory immediately. Also, all reads of the counter variable will be read directly from main memory.
+Java的`volatile`关键字就是为了解决变量的可见性问题。通过对计数器（counter）变量申明`volatile`关键字，所有线程对该变量的写入都会被立即同步到主内存中，并且，所有线程对该变量的读取都会直接从主内存读取。
+
+以下是计数器（counter）变量申明了关键字`volatile`的用法：
 
 Here is how the `volatile` declaration of the `counter` variable looks:
 
@@ -60,13 +59,13 @@ public class SharedObject {
 }
 ```
 
-Declaring a `variable` volatile thus guarantees the visibility for other threads of writes to that variable.
+因此，申明了`volatile`关键字的变量，保证了其他线程对该变量的写入可见性。
 
-In the scenario given above, where one thread (T1) modifies the counter, and another thread (T2) reads the counter (but never modifies it), declaring the `counter` variable `volatile` is enough to guarantee visibility for T2 of writes to the counter variable.
+在以上给出的场景中，一个线程（T1）修改了计数器变量，而另一个线程（T2）读取计数器变量（但是没有进行修改），这种场景下如果给计数器（counter）变量声明`volatile`关键字，就能够保证计数器（counter）变量的写入对线程（T2）是可见的。
 
-If, however, both T1 and T2 were incrementing the `counter` variable, then declaring the `counter` variable `volatile` would not have been enough. More on that later.
+但是如果线程（T1）和线程（T2）都对计数器（counter）变量进行了修改，那么给计数器（counter）变量声明`volatile`关键字是无法保证可见性的，稍后讨论。
 
-### Full volatile Visibility Guarantee
+### volatile 全局可见性保证
 
 Actually, the visibility guarantee of Java volatile goes beyond the volatile variable itself. The visibility guarantee is as follows:
 
@@ -215,4 +214,6 @@ The volatile keyword is guaranteed to work on 32 bit and 64 variables.
 
 Reading and writing of volatile variables causes the variable to be read or written to main memory. Reading from and writing to main memory is more expensive than accessing the CPU cache. Accessing volatile variables also prevent instruction reordering which is a normal performance enhancement technique. Thus, you should only use volatile variables when you really need to enforce visibility of variables.
 
-The End.
+（本篇完）
+
+?> ✨ 译文来源：[潘深练](http://www.panshenlian.com) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
