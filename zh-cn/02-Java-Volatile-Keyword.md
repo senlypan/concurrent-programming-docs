@@ -25,7 +25,7 @@ Java的`volatile`关键字在多线程处理中保证了共享变量的“可见
 
 对于无声明`volatile`关键词的变量而言，无法保证Java虚拟机（JVM）何时将数据从主内存读取到CPU缓存，或者将数据从CPU缓存写入主内存。这就可能会导致几个问题，我将在以下部分内容解释这些问题。
 
-想象一个场景，多个线程访问一个共享对象，该对象包含一个申明如下的计数器（counter）变量：
+想象一个场景，多个线程访问一个共享对象，该对象包含一个声明如下的计数器（counter）变量：
 
 ```java
 public class SharedObject {
@@ -35,9 +35,9 @@ public class SharedObject {
 }
 ```
 
-再想象以下，仅有线程1会增加计数器（counter）变量的值，不过线程1和线程2会不时的读取这个计数器变量。
+假设只有线程1会增加计数器（counter）变量的值，但是线程1和线程2会不时的读取这个计数器变量。
 
-如果计数器（counter）变量没有申明`volatile`关键词，则无法保证计数器变量的值何时从CPU缓存写回主内存。这就意味着，每个CPU缓存上的计数器变量值和主内存中的变量值可能不一致。这种情况如下所示：
+如果计数器（counter）变量没有声明`volatile`关键词，则无法保证计数器变量的值何时从CPU缓存写回主内存。这就意味着，每个CPU缓存上的计数器变量值和主内存中的变量值可能不一致。这种情况如下所示：
 
 ![02-Java-Volatile-Keyword.md#java-volatile-2.png](http://tutorials.jenkov.com/images/java-concurrency/java-volatile-2.png)
 
@@ -45,9 +45,9 @@ public class SharedObject {
 
 ## Java volatile 可见性保证
 
-Java的`volatile`关键字就是为了解决变量的可见性问题。通过对计数器（counter）变量申明`volatile`关键字，所有线程对该变量的写入都会被立即同步到主内存中，并且，所有线程对该变量的读取都会直接从主内存读取。
+Java的`volatile`关键字就是为了解决变量的可见性问题。通过对计数器（counter）变量声明`volatile`关键字，所有线程对该变量的写入都会被立即同步到主内存中，并且，所有线程对该变量的读取都会直接从主内存读取。
 
-以下是计数器（counter）变量申明了关键字`volatile`的用法：
+以下是计数器（counter）变量声明了关键字`volatile`的用法：
 
 Here is how the `volatile` declaration of the `counter` variable looks:
 
@@ -59,7 +59,7 @@ public class SharedObject {
 }
 ```
 
-因此，申明了`volatile`关键字的变量，保证了其他线程对该变量的写入可见性。
+因此，声明了`volatile`关键字的变量，保证了其他线程对该变量的写入可见性。
 
 在以上给出的场景中，一个线程（T1）修改了计数器变量，而另一个线程（T2）读取计数器变量（但是没有进行修改），这种场景下如果给计数器（counter）变量声明`volatile`关键字，就能够保证计数器（counter）变量的写入对线程（T2）是可见的。
 
@@ -67,13 +67,13 @@ public class SharedObject {
 
 ### volatile 全局可见性保证
 
-Actually, the visibility guarantee of Java volatile goes beyond the volatile variable itself. The visibility guarantee is as follows:
+实际上，Java的`volatile`关键字可见性保证超过了`volatile`变量本身的可见性，可见性保证如下：
 
-- If Thread A writes to a volatile variable and Thread B subsequently reads the same volatile variable, then all variables visible to Thread A before writing the volatile variable, will also be visible to Thread B after it has read the volatile variable.
+- 如果线程A写入一个`volatile`变量，而线程B随后读取了同一个`volatile`变量，那么所有变量的可见性，在线程A写入`volatile`变量之前对线程A可见，在线程B读取`volatile`变量之后对线程B同样可见。
 
-- If Thread A reads a volatile variable, then all all variables visible to Thread A when reading the volatile variable will also be re-read from main memory.
+- 如果线程A读取一个`volatile`变量，那么读取`volatile`变量时，对线程A可见的所有变量也会从主内存中重新读取。
 
-Let me illustrate that with a code example:
+让我用一个代码示例来说明:
 
 ```java
 public class MyClass {
@@ -90,11 +90,13 @@ public class MyClass {
 }
 ```
 
-The `udpate()` method writes three variables, of which only days is volatile.
+`udpate()`方法写入三个变量，其中只有变量days声明为`volatile`。
 
-The full `volatile` visibility guarantee means, that when a value is written to `days`, then all variables visible to the thread are also written to main memory. That means, that when a value is written to `days`, the values of `years` and months are also written to main memory.
+> `volatile`关键字声明的变量，被写入时会直接从本地线程缓存刷新到主内存。
 
-When reading the values of `years`, `months` and `days` you could do it like this:
+`volatile`的全局可见性保证，指的是当一个值被写入`days`时，所有对当前写入线程可见的变量也都会被写入到主内存。意思就是当一个值被写入`days`变量时，`year`变量和`months`变量也会被写入到主内存。
+
+在读`years`，`months`和`days`的值时，你可以这样做：
 
 ```java
 public class MyClass {
@@ -117,11 +119,11 @@ public class MyClass {
 }
 ```
 
-Notice the totalDays() method starts by reading the value of days into the total variable. When reading the value of days, the values of months and years are also read into main memory. Therefore you are guaranteed to see the latest values of days, months and years with the above read sequence.
+注意，`totalDays()`方法会首先读取`days`变量的值到total变量中，当程序读取`days`变量时，也会从主内存读取`month`变量和`years`变量的值。因此你可以通过以上的读取顺序，来保证读取到三个变量`days`,`months`和`years`最新的值。
 
-## Instruction Reordering Challenges
+## 指令重排序的挑战
 
-The Java VM and the CPU are allowed to reorder instructions in the program for performance reasons, as long as the semantic meaning of the instructions remain the same. For instance, look at the following instructions:
+为了提高性能，一般允许 JVM 和 CPU 在保证程序语义不变的情况下对程序中的指令进行重新排序。例如：
 
 ```java
 int a = 1;
@@ -131,7 +133,7 @@ a++;
 b++;
 ```
 
-These instructions could be reordered to the following sequence without losing the semantic meaning of the program:
+这些指令可以重新排序为以下顺序，而不会丢失程序的语义含义：
 
 ```java
 int a = 1;
@@ -141,7 +143,7 @@ int b = 2;
 b++;
 ```
 
-However, instruction reordering present a challenge when one of the variables is a volatile variable. Let us look at the MyClass class from the example earlier in this Java volatile tutorial:
+然而，当其中一个变量是`volatile`关键字声明的变量时，指令重排就会遇到一些挑战。让我们看看之前教程中的`MyClass`类示例：
 
 ```java
 public class MyClass {
@@ -158,7 +160,7 @@ public class MyClass {
 }
 ```
 
-Once the `update()` method writes a value to days, the newly written values to years and months are also written to main memory. But, what if the Java VM reordered the instructions, like this:
+一旦`update()`方法将一个值写入days变量，那么写入years变量和months变量的最新值也会被写入到主内存当中。但是，如果Java虚拟机对指令进行重排，例如这样：
 
 ```java
 public void update(int years, int months, int days){
@@ -168,19 +170,24 @@ public void update(int years, int months, int days){
 }
 ```
 
-The values of months and years are still written to main memory when the days variable is modified, but this time it happens before the new values have been written to months and years. The new values are thus not properly made visible to other threads. The semantic meaning of the reordered instructions has changed.
+当修改`days`变量时，仍然会将`months`变量和`years`变量的值写入主内存，但是这个节点是发生在新值写入`months`变量和`years`变量之前。因此`months`变量和`years`变量的最新值不可能正确地对其他线程可见。这种重排指令会导致语义发生改变。
 
-Java has a solution for this problem, as we will see in the next section.
+针对这个问题Java提供了一个解决方案，我们往下看。
 
-## The Java volatile Happens-Before Guarantee
+## Java volatile Happens-Before 规则
 
-To address the instruction reordering challenge, the Java volatile keyword gives a "happens-before" guarantee, in addition to the visibility guarantee. The happens-before guarantee guarantees that:
+为了解决指令重新排序的挑战，除了可见性保证之外，Java的`volatile`关键字还提供了happens-before规则。happens-before规则保证：
 
-- Reads from and writes to other variables cannot be reordered to occur after a write to a volatile variable, if the reads / writes originally occurred before the write to the volatile variable.
-The reads / writes before a write to a volatile variable are guaranteed to "happen before" the write to the volatile variable. Notice that it is still possible for e.g. reads / writes of other variables located after a write to a volatile to be reordered to occur before that write to the volatile. Just not the other way around. From after to before is allowed, but from before to after is not allowed.
-- Reads from and writes to other variables cannot be reordered to occur before a read of a volatile variable, if the reads / writes originally occurred after the read of the volatile variable. Notice that it is possible for reads of other variables that occur before the read of a volatile variable can be reordered to occur after the read of the volatile. Just not the other way around. From before to after is allowed, but from after to before is not allowed.
+- 如果其他变量的读写操作原先就发生在`volatile`变量写操作之前，那么其他变量的读写指令不能被重排序到volatile变量的写指令之后;
+    - 在`volatile`变量写入之前的其他变量读写，Happens-Before 于`volatile`变量的写入。
+    
+> 注意：例如在`volatile`变量写入之后的其他变量读写，仍然可能被重排到`volatile`变量写入之前。只不过不能反着来，允许后面的读写重排到前面，但不允许前面的读写重排到后面。
 
-The above happens-before guarantee assures that the visibility guarantee of the volatile keyword are being enforced.
+- 如果其他变量的读写操作原先就发生在`volatile`变量读操作之后，那么其他变量的读写指令不能被重排序到volatile变量的读指令之前; 
+    
+> 注意：例如在`volatile`变量读之前的其他变量读取，可能被重排到`volatile`变量的读之后。只不过不能反着来，允许前面的读取重排到后面，但不允许后面的读取重排到前面。
+
+上述的happens-before规则，确保了`volatile`关键字的可见性保证会被强制要求。
 
 ## volatile is Not Always Enough
 
