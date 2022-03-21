@@ -180,7 +180,7 @@ public void update(int years, int months, int days){
 
 - 如果其他变量的读写操作原先就发生在`volatile`变量写操作之前，那么其他变量的读写指令不能被重排序到volatile变量的写指令之后;
     - 在`volatile`变量写入之前的其他变量读写，Happens-Before 于`volatile`变量的写入。
-    
+
 > 注意：例如在`volatile`变量写入之后的其他变量读写，仍然可能被重排到`volatile`变量写入之前。只不过不能反着来，允许后面的读写重排到前面，但不允许前面的读写重排到后面。
 
 - 如果其他变量的读写操作原先就发生在`volatile`变量读操作之后，那么其他变量的读写指令不能被重排序到volatile变量的读指令之前; 
