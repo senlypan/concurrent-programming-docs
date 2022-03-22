@@ -41,15 +41,13 @@ public class SharedObject {
 
 ![02-Java-Volatile-Keyword.md#java-volatile-2.png](http://tutorials.jenkov.com/images/java-concurrency/java-volatile-2.png)
 
-一个线程的写操作还没有写回主内存，其他线程（每个线程自己有本地缓存，即CPU缓存）看不到变量的最新值，这就是“可见性”问题。一个线程的更新对其他相差是不可见的。
+一个线程的写操作还没有写回主内存（每个线程都有本地缓存，即CPU缓存，一般写入成功会从cpu缓存刷新至主内存），其他线程看不到变量的最新值，这就是“可见性”问题，即一个线程的更新对其他线程是不可见的。
 
 ## Java volatile 可见性保证
 
 Java的`volatile`关键字就是为了解决变量的可见性问题。通过对计数器（counter）变量声明`volatile`关键字，所有线程对该变量的写入都会被立即同步到主内存中，并且，所有线程对该变量的读取都会直接从主内存读取。
 
 以下是计数器（counter）变量声明了关键字`volatile`的用法：
-
-Here is how the `volatile` declaration of the `counter` variable looks:
 
 ```java
 public class SharedObject {
@@ -184,7 +182,7 @@ public void update(int years, int months, int days){
 > 注意：例如在`volatile`变量写入之后的其他变量读写，仍然可能被重排到`volatile`变量写入之前。只不过不能反着来，允许后面的读写重排到前面，但不允许前面的读写重排到后面。
 
 - 如果其他变量的读写操作原先就发生在`volatile`变量读操作之后，那么其他变量的读写指令不能被重排序到volatile变量的读指令之前; 
-    
+
 > 注意：例如在`volatile`变量读之前的其他变量读取，可能被重排到`volatile`变量的读之后。只不过不能反着来，允许前面的读取重排到后面，但不允许后面的读取重排到前面。
 
 上述的Happens-Before规则，确保了`volatile`关键字的可见性保证会被强制要求。
@@ -219,7 +217,7 @@ public void update(int years, int months, int days){
 
 ## volatile 的性能注意事项
 
-读写`volatile`变量都会直接从主内存读写，而直接读写主内存比读写CPU缓存需要花费更多的开销，但访问`volatile`变量可以阻止指令重排，这是一项正常的性能增强技术。因此，除非确实需要强制实施变量的可见性，否则其他情况减少使用`volatile`变量。
+读写`volatile`变量都会直接从主内存读写，比从CPU缓存读写要花更多的开销，但访问`volatile`变量可以阻止指令重排，这是一项正常的性能增强技术。因此，除非确实需要强制实施变量的可见性，否则其他情况减少使用`volatile`变量。
 
 （本篇完）
 
