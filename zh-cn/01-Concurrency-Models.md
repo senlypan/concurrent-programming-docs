@@ -208,4 +208,4 @@ Java7中的 `java.util.concurrent` 包里包含的ForkAndJoinPool能够帮助我
 
 （本篇完）
 
-?> ✨ 译文来源：[潘深练](http://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b%e6%a8%a1%e5%9e%8b/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
+?> ✨ 译文来源：[潘深练](https://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b%e6%a8%a1%e5%9e%8b/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~

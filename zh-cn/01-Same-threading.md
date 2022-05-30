@@ -143,6 +143,6 @@ Thread Ops for Java 是一个开源工具包，旨在帮助您更轻松地实现
 
 （本篇完）
 
-?> ✨ 译文来源：[潘深练](http://www.panshenlian.com) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
+?> ✨ 译文来源：[潘深练](https://www.panshenlian.com) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
 
 

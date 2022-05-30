@@ -81,4 +81,4 @@ CPU等待第一个文件被读取完。然后开始读取第二个文件。当�
 
 （本篇完）
 
-?> ✨ 译文来源：[潘深练](http://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/benefits/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
+?> ✨ 译文来源：[潘深练](https://www.panshenlian.com)，[并发编程网 – ifeve.com](http://ifeve.com/benefits/) 如您有更好的翻译版本，欢迎 ❤️ 提交 [issue](https://github.com/senlypan/concurrent-programming-docs/issues) 或投稿哦~
