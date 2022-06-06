@@ -1,5 +1,7 @@
 # Amdahl's Law
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.06-amdahl-s-law&left_color=blue&right_color=red)
+
 > Author: Jakob Jenkov
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/amdahls-law.html  Update: 2022-02-24

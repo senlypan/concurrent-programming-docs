@@ -1,5 +1,7 @@
 # 关于Volatile
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.02-java-volatile-keyword&left_color=blue&right_color=red)
+
 > 作者: 雅各布·詹科夫
 >
 > 原文: http://tutorials.jenkov.com/java-concurrency/volatile.html  最后更新: 2022-02-24

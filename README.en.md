@@ -1,5 +1,7 @@
 # Java concurrent programming summary document
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.readme-en&left_color=blue&right_color=red)
+
 ![icon](http://concurrent-programming.panshenlian.com/_media/icon200.png)
 
 > A co-creation document that aggregates the world's best Java concurrent programming content.

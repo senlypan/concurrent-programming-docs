@@ -1,5 +1,7 @@
 # Slipped Conditions
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.03-slipped-conditions-en&left_color=blue&right_color=red)
+
 > Author: Jakob Jenkov
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/slipped-conditions.html  Update: 2022-02-24

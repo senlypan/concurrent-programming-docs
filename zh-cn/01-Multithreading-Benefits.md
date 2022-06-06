@@ -1,5 +1,7 @@
 # 多线程的优点
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.01-multithreading-benefits&left_color=blue&right_color=red)
+
 > 作者: 雅各布·詹科夫
 >
 > 原文: http://tutorials.jenkov.com/java-concurrency/benefits.html  最后更新: 2022-02-23

@@ -1,5 +1,7 @@
 # CPU Cache Coherence in Java Concurrency
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.02-cpu-cache-coherence-in-java-concurrency&left_color=blue&right_color=red)
+
 > Author: Jakob Jenkov
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/cache-coherence-in-java-concurrency.html  Update: 2022-02-24

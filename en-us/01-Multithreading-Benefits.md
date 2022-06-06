@@ -1,5 +1,7 @@
 # Multithreading Benefits
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.01-multithreading-benefits-en&left_color=blue&right_color=red)
+
 > Author: Jakob Jenkov
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/benefits.html  Update: 2022-02-23

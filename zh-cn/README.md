@@ -1,5 +1,7 @@
 # Java并发编程聚合文档
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.readme&left_color=blue&right_color=red)
+
 ![icon](http://concurrent-programming.panshenlian.com/_media/icon200.png)
 
 > 一本聚合优质Java并发编程内容的共创文档。

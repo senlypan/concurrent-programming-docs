@@ -1,5 +1,7 @@
 # Java并发与多线程介绍
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.00-java-concurrency-and-multithreading-tutorial&left_color=blue&right_color=red)
+
 > 作者: 雅各布·詹科夫
 >
 > 原文: http://tutorials.jenkov.com/java-concurrency/index.html  最后更新: 2022-02-23

@@ -1,5 +1,7 @@
 # Anatomy of a Synchronizer
 
+![访问统计](https://visitor-badge.glitch.me/badge?page_id=senlypan.concurrent.06-anatomy-of-a-synchronizer&left_color=blue&right_color=red)
+
 > Author: Jakob Jenkov
 >
 > Link: http://tutorials.jenkov.com/java-concurrency/anatomy-of-a-synchronizer.html  Update: 2022-02-24
