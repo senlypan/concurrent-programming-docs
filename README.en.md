@@ -25,7 +25,7 @@ This document is open source（GihHub:senlypan/concurrent-programming-docs），
 
 # Contributor
 
-Pan Shenlian, creator of Java concurrent programming documentation, Network ID : biglate , Personal Website: https://www.panshenlian.com , Wechat Official Account: 潘潘和他的朋友们。
+Pan Shenlian, creator of Java concurrent programming documentation, Network ID : biglate , Personal Website: https://www.panshenlian.com , Wechat Official Account: 潘大晚。
 
 ***
 Powered by docsify

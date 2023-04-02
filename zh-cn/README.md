@@ -25,7 +25,7 @@ Java并发编程文档目前支持 `中文`、`英文` 两种语言阅读，文�
 
 # 共创
 
-潘深练，Java并发编程文档创建者，网名大晚，个人网站：https://www.panshenlian.com ，微信公众号：潘潘和他的朋友们。
+潘深练，Java并发编程文档创建者，网名大晚，个人网站：https://www.panshenlian.com ，微信公众号：潘大晚。
 
 ***
 Powered by docsify
